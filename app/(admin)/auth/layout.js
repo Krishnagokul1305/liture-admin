@@ -1,4 +1,3 @@
-import logo from "@/public/LE-01.png";
 import Image from "next/image";
 import loginImg from "@/public/login.jpg";
 import Logo from "../_components/Logo";
