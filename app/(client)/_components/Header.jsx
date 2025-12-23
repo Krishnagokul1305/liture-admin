@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import logo from "@/public/LE-01.png";
 import { useRouter, usePathname } from "next/navigation";
+import Image from "next/image";
 
 const Header = () => {
   const router = useRouter();
@@ -55,9 +56,9 @@ const Header = () => {
             {/* Logo */}
             <button
               onClick={() => router.push("/")}
-              className="flex items-center"
+              className="flex items-center relative"
             >
-              <img src={logo} alt="Logo" className="h-14" />
+              <Image src={logo} alt="Logo" height={55} />
             </button>
 
             {/* DESKTOP NAV */}
@@ -164,7 +165,7 @@ const Header = () => {
               </button>
 
               {isOpportunitiesOpen && (
-                <div className="ml-4 space-y-2">
+                <div className="ml-10 flex flex-col gap-4 items-start space-y-2">
                   <button onClick={() => router.push("/internships")}>
                     Internships
                   </button>

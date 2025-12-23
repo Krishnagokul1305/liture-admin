@@ -5,8 +5,8 @@ export function EmptyState({
   description = "Get started by creating your first item.",
 }) {
   return (
-    <div className="flex flex-col items-center justify-center text-center space-y-4 p-12">
-      <div className="rounded-full bg-muted p-4">
+    <div className="flex flex-col items-center bg-secondary rounded-t-lg justify-center text-center space-y-4 p-12">
+      <div className="rounded-full bg-sidebar p-4">
         <Inbox className="w-8 h-8 text-muted-foreground" />
       </div>
       <div className="space-y-1">

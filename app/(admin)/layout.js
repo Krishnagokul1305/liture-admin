@@ -1,16 +1,13 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "../globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import { Toaster } from "sonner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const poppins = Poppins({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
 });
 
 export const metadata = {
@@ -20,11 +17,11 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
-    >
-      <Toaster />
-      <ThemeProvider>{children}</ThemeProvider>
-    </div>
+    <html lang="en">
+      <body className={`${poppins.variable} antialiased`}>
+        <Toaster />
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
+    </html>
   );
 }

@@ -1,4 +1,3 @@
-import DemoTable from "@/app/(admin)/_components/DemoTable";
 import { EmptyState } from "@/app/(admin)/_components/EmptyState";
 import UserForm from "@/app/(admin)/_components/forms/UserForm";
 import Modal from "@/app/(admin)/_components/Modal";
@@ -6,6 +5,7 @@ import TableFilter from "@/components/table/TableFilter";
 import TableSearch from "@/components/table/TableSearch";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import UsersTable from "../../_components/tables/UsersTable";
 
 function page() {
   const demoData = [
@@ -84,13 +84,13 @@ function page() {
         />
       </div>
 
-      {demoData.length == 0 ? (
+      {demoData.length !== 0 ? (
         <EmptyState
           title="No projects yet"
           message="There aren't any projects at the moment"
         />
       ) : (
-        <DemoTable data={demoData} />
+        <UsersTable data={demoData} />
       )}
     </div>
   );

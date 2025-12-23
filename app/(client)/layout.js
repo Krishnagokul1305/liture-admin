@@ -1,11 +1,14 @@
+import { myFont } from "../font";
 import Header from "./_components/Header";
 
 function layout({ children }) {
   return (
-    <div className="light">
-      <Header />
-      {children}
-    </div>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${myFont.variable} antialiased`}>
+        <Header />
+        {children}
+      </body>
+    </html>
   );
 }
 
