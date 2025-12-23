@@ -8,11 +8,12 @@ import { Plus } from "lucide-react";
 import UsersTable from "../../_components/tables/UsersTable";
 import { getAllUsers } from "@/service/userService";
 
-async function page() {
-  const data = await getAllUsers();
+async function page({ searchParams }) {
+  const params = await searchParams;
+  const data = await getAllUsers(params);
   return (
     <div className="space-y-5">
-      <div className="flex md:items-center flex-col lg:flex-row justify-between mb-6">
+      <div className="flex md:items-center  flex-col lg:flex-row justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Users Management</h1>
           <p className="text-muted-foreground mt-1">
@@ -34,12 +35,12 @@ async function page() {
       <div className="flex rounded-md gap-4  items-center justify-between">
         <TableSearch />
         <TableFilter
-          name="status"
+          name="role"
           options={[
             { label: "All", value: "all" },
-            { label: "Active", value: "active" },
-            { label: "Inactive", value: "inactive" },
-            { label: "Completed", value: "completed" },
+            { label: "Admin", value: "ADMIN" },
+            { label: "Super Admin", value: "SUPERADMIN" },
+            { label: "User", value: "USER" },
           ]}
         />
       </div>
@@ -50,7 +51,7 @@ async function page() {
           message="There aren't any projects at the moment"
         />
       ) : (
-        <UsersTable data={data?.users} />
+        <UsersTable data={data?.users} pagination={data?.pagination} />
       )}
     </div>
   );

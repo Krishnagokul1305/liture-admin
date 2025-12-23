@@ -3,12 +3,12 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import InputField from "./InputField";
-import { signInSchema } from "../../lib/zod";
+import InputField from "../InputField";
+import { signInSchema } from "../../../lib/zod";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
-import { signInAction } from "../../lib/action";
+import { signInAction } from "../../../lib/action";
 import { useRouter } from "next/navigation";
 
 export function LoginForm({ className, ...props }) {
@@ -74,6 +74,12 @@ export function LoginForm({ className, ...props }) {
           error={errors.password}
           disabled={isSubmitting}
         />
+        <Link
+          href="forgot-password"
+          className="text-sm text-muted-foreground underline text-right"
+        >
+          Forgot password ?
+        </Link>
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? "Logging in..." : "Login"}
         </Button>

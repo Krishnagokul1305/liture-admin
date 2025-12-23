@@ -6,16 +6,13 @@ import { useMemo } from "react";
 
 const LIMIT = 6;
 
-export default function TablePagination({ count = 0 }) {
+export default function TablePagination({ pagination }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const currentPage = useMemo(() => {
-    const page = parseInt(searchParams.get("page")) || 1;
-    return page < 1 ? 1 : page;
-  }, [searchParams]);
+  const currentPage = pagination.page;
 
-  const totalPages = Math.ceil(count / LIMIT);
+  const totalPages = pagination.totalPages;
 
   const goToPage = (page) => {
     const params = new URLSearchParams(searchParams.toString());

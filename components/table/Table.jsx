@@ -18,7 +18,7 @@ import TablePagination from "./TablePagination";
 export default function DataTable({
   columnCofig,
   actionItems,
-  count,
+  pagination,
   data,
   isNeededHeader = true,
   isNeededPagination = true,
@@ -54,7 +54,9 @@ export default function DataTable({
         {isNeededHeader && <DataTableHeader table={table} />}
         <DataTableBody table={table} />
       </Table>
-      {isNeededPagination && <TablePagination table={table} count={count} />}
+      {isNeededPagination && (
+        <TablePagination table={table} pagination={pagination} />
+      )}
     </div>
   );
 }

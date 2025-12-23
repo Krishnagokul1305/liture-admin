@@ -7,7 +7,7 @@ import DeleteModal from "../DeleteModal";
 import UserForm from "../forms/UserForm";
 import { deleteUserAction } from "@/app/lib/action";
 
-export default function UsersTable({ data }) {
+export default function UsersTable({ data, pagination }) {
   const editModalRef = useRef(null);
   const deleteModalRef = useRef(null);
 
@@ -38,7 +38,7 @@ export default function UsersTable({ data }) {
           { accessorKey: "createdAt", header: "Created" },
         ]}
         data={data}
-        count={data.length}
+        pagination={pagination}
         actionItems={(row) => [
           {
             label: "Edit",
