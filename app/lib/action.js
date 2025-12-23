@@ -1,10 +1,21 @@
 "use server";
 
-import { signIn, signOut } from "./auth";
+import { auth, signIn, signOut } from "./auth";
 import dbConnect from "./db";
 import { sendWelcomeEmail } from "./email";
 import userModel from "./model/user.model";
 import bcrypt from "bcryptjs";
+import { createUser, getUserById } from "../../service/userService";
+
+export async function hasCurrentUserRole(...expectedRoles) {
+  const session = await auth();
+  if (!session?.user?.id) return false;
+
+  const user = await getUserById(session.user.id);
+  if (!user) return false;
+
+  return expectedRoles.includes(user.role);
+}
 
 export async function signInAction(data) {
   await signIn("credentials", {
@@ -21,10 +32,12 @@ export async function signOutAction() {
 export async function registerUserAction(data) {
   try {
     await dbConnect();
-    data.password = await bcrypt.hash(data.password, 10);
-    const user = await userModel.create(data);
+    if (!(await hasCurrentUserRole("SUPERADMIN"))) {
+      throw new Error("Unauthorized");
+    }
+    await createUser(data);
     await sendWelcomeEmail(user.email, user.name);
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 }
