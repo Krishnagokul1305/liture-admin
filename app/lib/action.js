@@ -3,9 +3,14 @@
 import { auth, signIn, signOut } from "./auth";
 import dbConnect from "./db";
 import { sendWelcomeEmail } from "./email";
-import userModel from "./model/user.model";
-import bcrypt from "bcryptjs";
-import { createUser, getUserById } from "../../service/userService";
+
+import {
+  createUser,
+  deleteUser,
+  getUserById,
+  updateUser,
+} from "../../service/userService";
+import { revalidatePath } from "next/cache";
 
 export async function hasCurrentUserRole(...expectedRoles) {
   const session = await auth();
@@ -32,12 +37,24 @@ export async function signOutAction() {
 export async function registerUserAction(data) {
   try {
     await dbConnect();
-    if (!(await hasCurrentUserRole("SUPERADMIN"))) {
-      throw new Error("Unauthorized");
-    }
-    await createUser(data);
+    // if (!(await hasCurrentUserRole("SUPERADMIN"))) {
+    //   throw new Error("Unauthorized");
+    // }
+    const user = await createUser(data);
+    revalidatePath("/admin/users");
     await sendWelcomeEmail(user.email, user.name);
   } catch (error) {
     throw error;
   }
+}
+
+export async function updateUserAction(id, data) {
+  await dbConnect();
+  await updateUser(id, data);
+  revalidatePath("/admin/users");
+}
+
+export async function deleteUserAction(id) {
+  await deleteUser(id);
+  revalidatePath("/admin/users");
 }

@@ -1,7 +1,10 @@
+import dbConnect from "@/app/lib/db";
 import userModel from "../app/lib/model/user.model";
 import bcrypt from "bcryptjs";
+import { formatDateTime } from "@/app/utils/helper";
 
 export async function getAllUsers({ role, search, page = 1, limit = 10 } = {}) {
+  await dbConnect();
   const query = {};
 
   if (role) {
@@ -21,12 +24,18 @@ export async function getAllUsers({ role, search, page = 1, limit = 10 } = {}) {
     .find(query)
     .skip(skip)
     .limit(limit)
-    .sort({ createdAt: -1 });
+    .sort({ createdAt: -1 })
+    .lean();
 
   const total = await userModel.countDocuments(query);
 
   return {
-    users,
+    users: users.map((user) => ({
+      ...user,
+      _id: user._id.toString(),
+      createdAt: formatDateTime(user.createdAt?.toISOString())?.date,
+      updatedAt: formatDateTime(user.updatedAt?.toISOString())?.date,
+    })),
     pagination: {
       total,
       page,
@@ -59,12 +68,20 @@ export const getUserById = async (userId) => {
   return user;
 };
 
-export const updateUserRole = async (userId, role) => {
-  const user = await userModel.findByIdAndUpdate(
-    userId,
-    { role },
-    { new: true, runValidators: true }
-  );
+export const updateUser = async (userId, data) => {
+  const allowedFields = ["name", "email", "role"];
+  const filteredData = {};
+
+  for (const key of allowedFields) {
+    if (data[key] !== undefined) {
+      filteredData[key] = data[key];
+    }
+  }
+
+  const user = await userModel.findByIdAndUpdate(userId, filteredData, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!user) throw new Error("User not found");
 

@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +31,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Eye, EyeOff } from "lucide-react";
+import { registerUserAction, updateUserAction } from "@/app/lib/action";
 
 const getFormSchema = (isCreate) =>
   z.object({
@@ -43,6 +44,7 @@ const getFormSchema = (isCreate) =>
   });
 
 export default function UserForm({ close, initialData, isCreate = true }) {
+  console.log(initialData);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -56,18 +58,18 @@ export default function UserForm({ close, initialData, isCreate = true }) {
     },
   });
 
-  async function onSubmit(values) {
+  async function onSubmit(data) {
     setLoading(true);
-
+    console.log(data);
     try {
       if (isCreate) {
-        toast.promise(createUserAction(values), {
+        toast.promise(registerUserAction(data), {
           loading: "Creating user...",
           success: "User created successfully!",
           error: "Error creating user",
         });
       } else {
-        toast.promise(updateUserAction(initialData._id, values), {
+        toast.promise(updateUserAction(initialData._id, data), {
           loading: "Updating user...",
           success: "User updated successfully!",
           error: "Error updating user",
@@ -113,7 +115,7 @@ export default function UserForm({ close, initialData, isCreate = true }) {
                   type="email"
                   placeholder="Enter email"
                   {...field}
-                  disabled={!isCreate} // usually email is immutable
+                  disabled={!isCreate}
                 />
               </FormControl>
               <FormMessage />

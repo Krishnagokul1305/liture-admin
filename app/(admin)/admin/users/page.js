@@ -6,50 +6,10 @@ import TableSearch from "@/components/table/TableSearch";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import UsersTable from "../../_components/tables/UsersTable";
+import { getAllUsers } from "@/service/userService";
 
-function page() {
-  const demoData = [
-    {
-      id: "u_001",
-      name: "Asha Patel",
-      email: "asha.patel@example.com",
-      role: "Intern",
-      status: "Active",
-      createdAt: "2025-11-12T09:23:00Z",
-    },
-    {
-      id: "u_002",
-      name: "Daniel Kim",
-      email: "daniel.kim@example.com",
-      role: "Member",
-      status: "Invited",
-      createdAt: "2025-12-01T14:45:00Z",
-    },
-    {
-      id: "u_003",
-      name: "María García",
-      email: "maria.garcia@example.com",
-      role: "Admin",
-      status: "Active",
-      createdAt: "2024-07-30T08:10:00Z",
-    },
-    {
-      id: "u_004",
-      name: "Oluwaseun Adeyemi",
-      email: "seun.adeyemi@example.com",
-      role: "Member",
-      status: "Suspended",
-      createdAt: "2023-02-17T16:05:00Z",
-    },
-    {
-      id: "u_005",
-      name: "Liam O'Connor",
-      email: "liam.oconnor@example.com",
-      role: "Intern",
-      status: "Active",
-      createdAt: "2025-10-03T12:00:00Z",
-    },
-  ];
+async function page() {
+  const data = await getAllUsers();
   return (
     <div className="space-y-5">
       <div className="flex md:items-center flex-col lg:flex-row justify-between mb-6">
@@ -84,13 +44,13 @@ function page() {
         />
       </div>
 
-      {demoData.length !== 0 ? (
+      {data.length === 0 ? (
         <EmptyState
           title="No projects yet"
           message="There aren't any projects at the moment"
         />
       ) : (
-        <UsersTable data={demoData} />
+        <UsersTable data={data?.users} />
       )}
     </div>
   );
