@@ -2,7 +2,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import TableColumnHeader from "./TableHeaderItem";
-import ReusableDropDown from "@/app/(admin)/_components/ReusableDropDown";
+import ReusableDropDown from "@/app/_components/ReusableDropDown";
 
 export function createColumn(columnsConfig, actionItems = [], options = {}) {
   const {

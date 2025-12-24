@@ -1,28 +1,19 @@
 "use server";
 
-import { auth, signIn, signOut } from "./auth";
+import { signIn, signOut } from "./auth";
 import dbConnect from "./db";
 import { sendResetPasswordEmail, sendWelcomeEmail } from "./email";
 import crypto from "crypto";
+import bcrypt from "bcryptjs";
 
 import {
   createUser,
   deleteUser,
-  getUserById,
+  hasCurrentUserRole,
   updateUser,
 } from "../../service/userService";
 import { revalidatePath } from "next/cache";
 import userModel from "./model/user.model";
-
-export async function hasCurrentUserRole(...expectedRoles) {
-  const session = await auth();
-  if (!session?.user?.id) return false;
-
-  const user = await getUserById(session.user.id);
-  if (!user) return false;
-
-  return expectedRoles.includes(user.role);
-}
 
 export async function signInAction(data) {
   await signIn("credentials", {
@@ -39,11 +30,11 @@ export async function signOutAction() {
 export async function registerUserAction(data) {
   try {
     await dbConnect();
-    // if (!(await hasCurrentUserRole("SUPERADMIN"))) {
-    //   throw new Error("Unauthorized");
-    // }
+    if (!(await hasCurrentUserRole("SUPERADMIN"))) {
+      throw new Error("Unauthorized");
+    }
     const user = await createUser(data);
-    revalidatePath("/admin/users");
+    revalidatePath("/users");
     await sendWelcomeEmail(user.email, user.name);
   } catch (error) {
     throw error;
@@ -53,12 +44,12 @@ export async function registerUserAction(data) {
 export async function updateUserAction(id, data) {
   await dbConnect();
   await updateUser(id, data);
-  revalidatePath("/admin/users");
+  revalidatePath("/users");
 }
 
 export async function deleteUserAction(id) {
   await deleteUser(id);
-  revalidatePath("/admin/users");
+  revalidatePath("/users");
 }
 
 export async function forgotPasswordAction(email) {
@@ -74,7 +65,7 @@ export async function forgotPasswordAction(email) {
 
   await user.save({ validateBeforeSave: false });
 
-  const resetURL = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password?token=${resetToken}`;
+  const resetURL = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
 
   await sendResetPasswordEmail(user.email, resetURL);
 
@@ -99,7 +90,9 @@ export async function resetPasswordAction(token, newPassword) {
     throw new Error("Token is invalid or has expired");
   }
 
-  user.password = newPassword;
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  user.password = hashedPassword;
 
   user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;

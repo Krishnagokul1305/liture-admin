@@ -4,18 +4,31 @@ import { NextResponse } from "next/server";
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/admin")) {
-    const session = await auth();
+  const publicRoutes = [
+    "/login",
+    "/forgot-password",
+    "/reset-password",
+    "/auth/login",
+  ];
 
-    if (!session) {
-      const loginUrl = new URL("/auth/login", request.url);
-      return NextResponse.redirect(loginUrl);
-    }
+  const isPublicRoute = publicRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
+  const session = await auth();
+
+  if (!session) {
+    const loginUrl = new URL("/login", request.url);
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

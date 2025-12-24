@@ -19,7 +19,7 @@ export default function NotFound() {
       </div>
       <div className="flex gap-3">
         <Button asChild>
-          <Link href="/admin">Go Home</Link>
+          <Link href="/">Go Home</Link>
         </Button>
         <Button variant="outline" onClick={() => window.history.back()}>
           Go Back

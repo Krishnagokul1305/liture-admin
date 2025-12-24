@@ -2,6 +2,7 @@ import dbConnect from "@/app/lib/db";
 import userModel from "../app/lib/model/user.model";
 import bcrypt from "bcryptjs";
 import { formatDateTime } from "@/app/utils/helper";
+import { auth } from "@/app/lib/auth";
 
 export async function getAllUsers({ role, search, page = 1, limit = 10 } = {}) {
   await dbConnect();
@@ -78,6 +79,8 @@ export const updateUser = async (userId, data) => {
     }
   }
 
+  console.log(data);
+
   const user = await userModel.findByIdAndUpdate(userId, filteredData, {
     new: true,
     runValidators: true,
@@ -93,3 +96,21 @@ export const deleteUser = async (userId) => {
   if (!user) throw new Error("User not found");
   return true;
 };
+
+export const getCurrentUser = async () => {
+  const user = (await auth())?.user;
+  if (!user) {
+    throw new Error("Session not found");
+  }
+  return getUserById(user?.id);
+};
+
+export async function hasCurrentUserRole(...expectedRoles) {
+  const session = await auth();
+  if (!session?.user?.id) return false;
+
+  const user = await getUserById(session.user.id);
+  if (!user) return false;
+
+  return expectedRoles.includes(user.role);
+}
