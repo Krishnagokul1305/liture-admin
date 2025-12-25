@@ -61,7 +61,7 @@ export function NavUser() {
               >
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
-                    src={user.avatar || "/placeholder.svg"}
+                    src={user?.avatar || "/placeholder.svg"}
                     alt={user.name}
                   />
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>

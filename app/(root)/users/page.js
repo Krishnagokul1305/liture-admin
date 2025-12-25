@@ -48,7 +48,7 @@ async function page({ searchParams }) {
         />
       </div>
 
-      {data.length === 0 ? (
+      {data?.pagination?.total === 0 ? (
         <EmptyState
           title="No projects yet"
           message="There aren't any projects at the moment"

@@ -9,7 +9,12 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-export default function TableFilter({ name, options, defaultValue = "all" }) {
+export default function TableFilter({
+  name,
+  options,
+  defaultValue = "all",
+  className,
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -33,7 +38,7 @@ export default function TableFilter({ name, options, defaultValue = "all" }) {
       className="bg-sidebar"
       onValueChange={handleChange}
     >
-      <SelectTrigger className="max-w-[150px] bg-sidebar">
+      <SelectTrigger className={`max-w-[150px] bg-sidebar ${className}`}>
         <SelectValue placeholder="Select option" />
       </SelectTrigger>
       <SelectContent>

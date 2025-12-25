@@ -47,6 +47,7 @@ export async function getAllUsers({ role, search, page = 1, limit = 10 } = {}) {
 }
 
 export async function createUser(data) {
+  await dbConnect();
   const { name, email, password, role = "USER" } = data;
 
   const hashedPassword = await bcrypt.hash(password, 12);
@@ -62,6 +63,7 @@ export async function createUser(data) {
 }
 
 export const getUserById = async (userId) => {
+  await dbConnect();
   const user = await userModel.findById(userId);
 
   if (!user) throw new Error("User not found");
@@ -70,6 +72,7 @@ export const getUserById = async (userId) => {
 };
 
 export const updateUser = async (userId, data) => {
+  await dbConnect();
   const allowedFields = ["name", "email", "role"];
   const filteredData = {};
 
@@ -92,6 +95,7 @@ export const updateUser = async (userId, data) => {
 };
 
 export const deleteUser = async (userId) => {
+  await dbConnect();
   const user = await userModel.findByIdAndDelete(userId);
   if (!user) throw new Error("User not found");
   return true;

@@ -1,0 +1,145 @@
+import dbConnect from "@/app/lib/db";
+import webinarModel from "@/app/lib/model/webinar.model";
+import { formatDateTime } from "@/app/utils/helper";
+
+/* ============================
+   GET ALL WEBINARS
+============================ */
+export async function getAllWebinars({
+  search,
+  status,
+  time, // "past" | "upcoming"
+  page = 1,
+  limit = 10,
+} = {}) {
+  await dbConnect();
+
+  const query = {};
+  const now = new Date();
+
+  if (status) {
+    query.status = status;
+  }
+
+  // 🔍 Search
+  if (search) {
+    query.$or = [
+      { title: { $regex: search, $options: "i" } },
+      { description: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  // ⏱ Time-based filtering
+  if (time === "upcoming") {
+    query.eventDate = { $gte: now };
+  }
+
+  if (time === "past") {
+    query.eventDate = { $lt: now };
+  }
+
+  const skip = (page - 1) * limit;
+
+  // 📌 Sorting logic
+  const sort =
+    time === "upcoming"
+      ? { eventDate: 1 } // nearest upcoming first
+      : time === "past"
+      ? { eventDate: -1 } // latest past first
+      : { createdAt: -1 }; // default
+
+  const webinars = await Webinar.find(query)
+    .skip(skip)
+    .limit(limit)
+    .sort(sort)
+    .lean();
+
+  const total = await Webinar.countDocuments(query);
+
+  return {
+    webinars: webinars.map((webinar) => ({
+      ...webinar,
+      _id: webinar._id.toString(),
+      eventDate: formatDateTime(webinar.eventDate)?.date,
+      createdAt: formatDateTime(webinar.createdAt)?.date,
+    })),
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+}
+
+/* ============================
+   CREATE WEBINAR
+============================ */
+export async function createWebinar(data) {
+  await dbConnect();
+
+  const webinar = await webinarModel.create({
+    image: data.image,
+    title: data.title,
+    description: data.description,
+    eventDate: data.eventDate,
+    status: data.status || "upcoming",
+  });
+
+  return webinar;
+}
+
+/* ============================
+   GET WEBINAR BY ID
+============================ */
+export async function getWebinarById(id) {
+  await dbConnect();
+
+  const webinar = await webinarModel.findById(id);
+  if (!webinar) throw new Error("Webinar not found");
+
+  return webinar;
+}
+
+/* ============================
+   UPDATE WEBINAR
+============================ */
+export async function updateWebinar(id, data) {
+  await dbConnect();
+
+  const allowedFields = [
+    "image",
+    "title",
+    "description",
+    "eventDate",
+    "status",
+  ];
+
+  const filteredData = {};
+  for (const key of allowedFields) {
+    if (data[key] !== undefined) {
+      filteredData[key] = data[key];
+    }
+  }
+
+  const webinar = await webinarModel.findByIdAndUpdate(id, filteredData, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!webinar) throw new Error("Webinar not found");
+
+  return webinar;
+}
+
+/* ============================
+   DELETE WEBINAR
+============================ */
+export async function deleteWebinar(id) {
+  await dbConnect();
+
+  const webinar = await webinarModel.findByIdAndDelete(id);
+  if (!webinar) throw new Error("Webinar not found");
+
+  return true;
+}

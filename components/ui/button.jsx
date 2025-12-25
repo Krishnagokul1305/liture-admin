@@ -1,6 +1,9 @@
+"use client";
+
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
+import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 
@@ -35,12 +38,32 @@ const buttonVariants = cva(
   }
 );
 
-function Button({ className, variant, size, asChild = false, ...props }) {
+function Button({
+  className,
+  variant,
+  size,
+  asChild = false,
+  href,
+  onClick,
+  ...props
+}) {
+  const router = useRouter();
   const Comp = asChild ? Slot : "button";
+
+  const handleClick = (e) => {
+    if (href) {
+      e.preventDefault();
+      router.push(href);
+      return;
+    }
+
+    onClick?.(e);
+  };
 
   return (
     <Comp
       data-slot="button"
+      onClick={handleClick}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     />
