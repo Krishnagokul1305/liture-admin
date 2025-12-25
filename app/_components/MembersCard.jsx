@@ -1,0 +1,43 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
+import Modal from "./Modal";
+import MembershipForm from "./forms/MemberShipForm";
+
+export default function MembersCard({ membership }) {
+  return (
+    <div className="group relative bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-all duration-300">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-primary/50"></div>
+
+      <div className="p-5">
+        <div className="mb-4">
+          <h3 className="text-xl lg:text-2xl font-bold text-foreground">
+            {membership.name}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            {membership.description}
+          </p>
+        </div>
+
+        <div className="space-y-3 mb-6">
+          {membership.benefits.map((benefit, idx) => (
+            <div key={idx} className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-foreground">{benefit}</span>
+            </div>
+          ))}
+        </div>
+        <Modal
+          title="Edit Membership"
+          description="Modify membership information."
+          Trigger={
+            <Button className="flex-1 border-border w-full">Edit</Button>
+          }
+        >
+          <MembershipForm initialData={membership} mode="edit" />
+        </Modal>
+      </div>
+    </div>
+  );
+}

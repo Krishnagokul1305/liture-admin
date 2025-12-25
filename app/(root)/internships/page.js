@@ -17,8 +17,8 @@ async function page({ searchParams }) {
     <div className="space-y-5">
       <div className="flex md:items-center  flex-col lg:flex-row justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">Internship</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-xl md:text-3xl font-bold">Internship</h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-1">
             Manage internship listings, schedules, and visibility for users.
           </p>
         </div>

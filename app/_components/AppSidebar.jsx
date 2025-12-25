@@ -28,8 +28,8 @@ const data = {
       icon: Briefcase,
     },
     {
-      title: "Members",
-      url: "members",
+      title: "Memberships",
+      url: "memberships",
       icon: Users,
     },
     {

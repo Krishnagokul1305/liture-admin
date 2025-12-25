@@ -31,8 +31,10 @@ export default async function Page({ params, searchParams }) {
       </Link>
 
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">{current.title}</h1>
-        <p className="text-muted-foreground mt-1">{current.description}</p>
+        <h1 className="text-xl md:text-3xl font-bold">{current.title}</h1>
+        <p className="text-sm md:text-base text-muted-foreground mt-1">
+          {current.description}
+        </p>
       </div>
 
       <WebinarForm mode={mode} webinarId={id} initialData={currentWebinar} />
