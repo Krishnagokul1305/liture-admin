@@ -6,8 +6,14 @@ import Modal from "./Modal";
 import MembershipForm from "./forms/MemberShipForm";
 
 export default function MembersCard({ membership }) {
+  const isInactive = !membership.isActive;
+
   return (
-    <div className="group relative bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-all duration-300">
+    <div
+      className={`group relative bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-all duration-300 ${
+        isInactive ? "opacity-50" : ""
+      }`}
+    >
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-primary/50"></div>
 
       <div className="p-5">
@@ -28,6 +34,7 @@ export default function MembersCard({ membership }) {
             </div>
           ))}
         </div>
+
         <Modal
           title="Edit Membership"
           description="Modify membership information."
