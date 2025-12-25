@@ -1,5 +1,5 @@
-import InternshipForm from "@/app/_components/forms/InternshipForm";
-import { getInternshipById } from "@/service/internshipService";
+import WebinarForm from "@/app/_components/forms/WebinarForm";
+import { getWebinarById } from "@/service/webinarService";
 import Link from "next/link";
 
 export default async function Page({ params, searchParams }) {
@@ -7,24 +7,24 @@ export default async function Page({ params, searchParams }) {
   let { mode = "view" } = await searchParams;
   const pageConfig = {
     edit: {
-      title: "Edit Internship",
-      description: "Update the internship opportunity on the platform.",
+      title: "Edit Webinar",
+      description: "Update the webinar session on the platform.",
     },
     view: {
-      title: "View Internship",
-      description: "Review internship details in read-only mode.",
+      title: "View Webinar",
+      description: "Review webinar details in read-only mode.",
     },
   };
 
   mode = mode === "edit" ? "edit" : "view";
 
   const current = pageConfig[mode];
-  const currentInternship = await getInternshipById(id);
+  const currentWebinar = await getWebinarById(id);
 
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
       <Link
-        href="/internships"
+        href="/webinars"
         className="inline-flex text-sm items-center text-primary font-medium mb-6 transition"
       >
         ← Back
@@ -35,11 +35,7 @@ export default async function Page({ params, searchParams }) {
         <p className="text-muted-foreground mt-1">{current.description}</p>
       </div>
 
-      <InternshipForm
-        mode={mode}
-        internshipId={id}
-        initialData={currentInternship}
-      />
+      <WebinarForm mode={mode} webinarId={id} initialData={currentWebinar} />
     </div>
   );
 }

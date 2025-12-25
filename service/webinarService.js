@@ -48,13 +48,14 @@ export async function getAllWebinars({
       ? { eventDate: -1 } // latest past first
       : { createdAt: -1 }; // default
 
-  const webinars = await Webinar.find(query)
+  const webinars = await webinarModel
+    .find(query)
     .skip(skip)
     .limit(limit)
     .sort(sort)
     .lean();
 
-  const total = await Webinar.countDocuments(query);
+  const total = await webinarModel.countDocuments(query);
 
   return {
     webinars: webinars.map((webinar) => ({
@@ -89,21 +90,20 @@ export async function createWebinar(data) {
   return webinar;
 }
 
-/* ============================
-   GET WEBINAR BY ID
-============================ */
 export async function getWebinarById(id) {
   await dbConnect();
 
-  const webinar = await webinarModel.findById(id);
+  const webinar = await webinarModel.findById(id).lean();
   if (!webinar) throw new Error("Webinar not found");
 
-  return webinar;
+  return {
+    ...webinar,
+    _id: webinar._id.toString(),
+    eventDate: formatDateTime(webinar.eventDate)?.date,
+    createdAt: formatDateTime(webinar.createdAt)?.date,
+  };
 }
 
-/* ============================
-   UPDATE WEBINAR
-============================ */
 export async function updateWebinar(id, data) {
   await dbConnect();
 

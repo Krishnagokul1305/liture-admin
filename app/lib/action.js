@@ -14,6 +14,16 @@ import {
 } from "../../service/userService";
 import { revalidatePath } from "next/cache";
 import userModel from "./model/user.model";
+import {
+  createInternship,
+  deleteInternship,
+  updateInternship,
+} from "@/service/internshipService";
+import {
+  createWebinar,
+  updateWebinar,
+  deleteWebinar,
+} from "@/service/webinarService";
 
 export async function signInAction(data) {
   await signIn("credentials", {
@@ -100,4 +110,34 @@ export async function resetPasswordAction(token, newPassword) {
   await user.save();
 
   return true;
+}
+
+export async function createInternshipAction(data) {
+  await createInternship(data);
+  revalidatePath("/internships");
+}
+
+export async function updateInternshipAction(id, data) {
+  await updateInternship(id, data);
+  revalidatePath("/internships");
+}
+
+export async function deleteInternshipAction(id) {
+  await deleteInternship(id);
+  revalidatePath("/internships");
+}
+
+export async function createWebinarAction(data) {
+  await createWebinar(data);
+  revalidatePath("/webinars");
+}
+
+export async function updateWebinarAction(id, data) {
+  await updateWebinar(id, data);
+  revalidatePath("/webinars");
+}
+
+export async function deleteWebinarAction(id) {
+  await deleteWebinar(id);
+  revalidatePath("/webinars");
 }

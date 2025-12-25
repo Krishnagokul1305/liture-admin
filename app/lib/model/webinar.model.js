@@ -16,5 +16,5 @@ const webinarSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Webinar ||
-  mongoose.model("Webinar", webinarSchema);
+export default mongoose.models?.webinars ||
+  mongoose.model("webinars", webinarSchema);

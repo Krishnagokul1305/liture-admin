@@ -2,9 +2,6 @@ import dbConnect from "@/app/lib/db";
 import internshipModel from "@/app/lib/model/internship.model";
 import { formatDateTime } from "@/app/utils/helper";
 
-/* ============================
-   GET ALL INTERNSHIPS
-============================ */
 export async function getAllInternships({
   search,
   status,
@@ -81,15 +78,13 @@ export async function getAllInternships({
 export async function createInternship(data) {
   await dbConnect();
 
-  const internship = await internshipModel.create({
+  await internshipModel.create({
     image: data.image,
     title: data.title,
     description: data.description,
     eventDate: data.eventDate,
     status: data.status || "active",
   });
-
-  return internship;
 }
 
 /* ============================
@@ -98,10 +93,15 @@ export async function createInternship(data) {
 export async function getInternshipById(id) {
   await dbConnect();
 
-  const internship = await internshipModel.findById(id);
+  const internship = await internshipModel.findById(id).lean();
   if (!internship) throw new Error("Internship not found");
 
-  return internship;
+  return {
+    ...internship,
+    _id: internship._id.toString(),
+    eventDate: formatDateTime(internship.eventDate)?.date,
+    createdAt: formatDateTime(internship.createdAt)?.date,
+  };
 }
 
 /* ============================

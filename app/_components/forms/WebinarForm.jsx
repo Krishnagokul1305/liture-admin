@@ -29,14 +29,11 @@ import ImageUploader from "@/components/ImageUploader";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  createInternshipAction,
-  updateInternshipAction,
-} from "@/app/lib/action";
+import { createWebinarAction, updateWebinarAction } from "@/app/lib/action";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-const internshipSchema = z.object({
+const webinarSchema = z.object({
   image: z.any().optional(),
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -44,16 +41,16 @@ const internshipSchema = z.object({
   status: z.enum(["active", "inactive"]),
 });
 
-export default function InternshipForm({
+export default function WebinarForm({
   mode = "create",
   initialData = null,
-  internshipId,
+  webinarId,
 }) {
   const router = useRouter();
   const isViewMode = mode === "view";
 
   const form = useForm({
-    resolver: zodResolver(internshipSchema),
+    resolver: zodResolver(webinarSchema),
     defaultValues: {
       image: initialData?.image || null,
       title: initialData?.title || "",
@@ -69,27 +66,26 @@ export default function InternshipForm({
     try {
       if (mode === "create") {
         toast.promise(
-          createInternshipAction({
+          createWebinarAction({
             ...data,
-            image:
-              "https://img.freepik.com/free-photo/courage-man-jump-through-gap-hill-business-concept-idea_1323-262.jpg",
+            image: data.image || "https://placehold.co/600x400",
           }),
           {
-            loading: "Creating Internship...",
-            success: "Created Internship successfully!",
-            error: "Error Creating Internship",
+            loading: "Creating Webinar...",
+            success: "Created Webinar successfully!",
+            error: "Error Creating Webinar",
           }
         );
       }
 
       if (mode === "edit") {
-        toast.promise(updateInternshipAction(internshipId, data), {
-          loading: "Updating Internship...",
-          success: "Updated Internship successfully!",
-          error: "Error Updating Internship",
+        toast.promise(updateWebinarAction(webinarId, data), {
+          loading: "Updating Webinar...",
+          success: "Updated Webinar successfully!",
+          error: "Error Updating Webinar",
         });
       }
-      router.push("/internships");
+      router.push("/webinars");
     } catch (err) {
       console.error(err);
       alert("Something went wrong");
@@ -108,7 +104,7 @@ export default function InternshipForm({
               <FormControl>
                 <Input
                   className={"py-5"}
-                  placeholder="Enter internship title"
+                  placeholder="Enter webinar title"
                   disabled={isViewMode}
                   {...field}
                 />
@@ -126,7 +122,7 @@ export default function InternshipForm({
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Enter internship description"
+                  placeholder="Enter webinar description"
                   disabled={isViewMode}
                   {...field}
                   rows={4}

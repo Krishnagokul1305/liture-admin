@@ -6,14 +6,20 @@ export async function GET(req, res) {
   try {
     await dbConnect();
     const internships = await internshipModel.find();
-    return NextResponse.json({
-      status: "success",
-      data: internships,
-    });
+    return NextResponse.json(
+      {
+        status: "success",
+        data: internships,
+      },
+      { status: 200 }
+    );
   } catch (error) {
-    return res.status(500).json({
-      status: "error",
-      message: error.message,
-    });
+    return NextResponse.json(
+      {
+        status: "error",
+        message: error.message || "Something went wrong",
+      },
+      { status: 500 }
+    );
   }
 }

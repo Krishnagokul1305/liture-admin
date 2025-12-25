@@ -1,6 +1,4 @@
 import { EmptyState } from "@/app/_components/EmptyState";
-import UserForm from "@/app/_components/forms/UserForm";
-import Modal from "@/app/_components/Modal";
 import TableFilter from "@/components/table/TableFilter";
 import TableSearch from "@/components/table/TableSearch";
 import { Button } from "@/components/ui/button";
@@ -8,7 +6,6 @@ import { Plus } from "lucide-react";
 import { hasCurrentUserRole } from "@/service/userService";
 import { getAllInternships } from "@/service/internshipService";
 import InternshipTable from "@/app/_components/tables/InternshipTable";
-import InternshipForm from "@/app/_components/forms/InternshipForm";
 
 async function page({ searchParams }) {
   if (!(await hasCurrentUserRole("SUPERADMIN", "ADMIN"))) {
@@ -16,7 +13,6 @@ async function page({ searchParams }) {
   }
   const params = await searchParams;
   const data = await getAllInternships(params);
-  console.log(data);
   return (
     <div className="space-y-5">
       <div className="flex md:items-center  flex-col lg:flex-row justify-between mb-6">
@@ -43,7 +39,7 @@ async function page({ searchParams }) {
             ]}
           />
           <TableFilter
-            name="role"
+            name="status"
             className={"w-full"}
             options={[
               { label: "All", value: "all" },
@@ -60,7 +56,10 @@ async function page({ searchParams }) {
           message="There aren't any internships at the moment"
         />
       ) : (
-        <InternshipTable data={data?.users} pagination={data?.pagination} />
+        <InternshipTable
+          data={data?.internships}
+          pagination={data?.pagination}
+        />
       )}
     </div>
   );
