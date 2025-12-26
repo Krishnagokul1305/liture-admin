@@ -24,17 +24,17 @@ const data = {
     },
     {
       title: "Internships",
-      url: "internships",
+      url: "/internships",
       icon: Briefcase,
     },
     {
       title: "Memberships",
-      url: "memberships",
+      url: "/memberships",
       icon: Users,
     },
     {
       title: "Webinars",
-      url: "webinars",
+      url: "/webinars",
       icon: Video,
     },
     {
@@ -58,7 +58,7 @@ const data = {
     },
     {
       title: "Users",
-      url: "users",
+      url: "/users",
       icon: Users,
     },
   ],

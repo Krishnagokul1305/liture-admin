@@ -29,6 +29,7 @@ import {
   deleteMembership,
   updateMembership,
 } from "@/service/membershipService";
+import { uploadImageToS3 } from "./s3";
 
 export async function signInAction(data) {
   await signIn("credentials", {
@@ -117,12 +118,45 @@ export async function resetPasswordAction(token, newPassword) {
   return true;
 }
 
-export async function createInternshipAction(data) {
+export async function createInternshipAction(formData) {
+  const imageFile = formData.get("image");
+
+  let imageUrl =
+    "https://img.freepik.com/free-photo/courage-man-jump-through-gap-hill-business-concept-idea_1323-262.jpg";
+
+  if (imageFile instanceof File && imageFile.size > 0) {
+    imageUrl = await uploadImageToS3(imageFile);
+  }
+
+  const data = {
+    title: formData.get("title"),
+    description: formData.get("description"),
+    status: formData.get("status"),
+    eventDate: new Date(formData.get("eventDate")),
+    image: imageUrl,
+  };
+
   await createInternship(data);
   revalidatePath("/internships");
 }
 
-export async function updateInternshipAction(id, data) {
+export async function updateInternshipAction(id, formData) {
+  const imageFile = formData.get("image");
+
+  let imageUrl;
+
+  if (imageFile instanceof File && imageFile.size > 0) {
+    imageUrl = await uploadImageToS3(imageFile);
+  }
+
+  const data = {
+    title: formData.get("title"),
+    description: formData.get("description"),
+    status: formData.get("status"),
+    eventDate: new Date(formData.get("eventDate")),
+    ...(imageUrl && { image: imageUrl }),
+  };
+
   await updateInternship(id, data);
   revalidatePath("/internships");
 }
@@ -132,13 +166,45 @@ export async function deleteInternshipAction(id) {
   revalidatePath("/internships");
 }
 
-export async function createWebinarAction(data) {
-  await createWebinar(data);
+export async function createWebinarAction(formData) {
+  const imageFile = formData.get("image");
+
+  let imageUrl = "https://placehold.co/600x400";
+
+  if (imageFile instanceof File && imageFile.size > 0) {
+    imageUrl = await uploadImageToS3(imageFile);
+  }
+
+  const payload = {
+    title: formData.get("title"),
+    description: formData.get("description"),
+    eventDate: new Date(formData.get("eventDate")),
+    status: formData.get("status"),
+    image: imageUrl,
+  };
+
+  await createWebinar(payload);
   revalidatePath("/webinars");
 }
 
-export async function updateWebinarAction(id, data) {
-  await updateWebinar(id, data);
+export async function updateWebinarAction(id, formData) {
+  const imageFile = formData.get("image");
+
+  let imageUrl = undefined;
+
+  if (imageFile instanceof File && imageFile.size > 0) {
+    imageUrl = await uploadImageToS3(imageFile);
+  }
+
+  const payload = {
+    title: formData.get("title"),
+    description: formData.get("description"),
+    eventDate: new Date(formData.get("eventDate")),
+    status: formData.get("status"),
+    ...(imageUrl && { image: imageUrl }),
+  };
+
+  await updateWebinar(id, payload);
   revalidatePath("/webinars");
 }
 

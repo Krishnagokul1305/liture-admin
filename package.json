@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.958.0",
     "@emoji-mart/data": "^1.2.1",
     "@emoji-mart/react": "^1.1.1",
     "@hookform/resolvers": "^5.2.2",
@@ -46,6 +47,7 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.69.0",
     "react-hot-toast": "^2.6.0",
+    "recharts": "^2.15.4",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
     "zod": "^3.25.76"

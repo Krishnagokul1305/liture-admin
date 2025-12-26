@@ -72,6 +72,19 @@ export async function getAllInternships({
   };
 }
 
+export async function getAllInternshipsOptions() {
+  await dbConnect();
+
+  const internships = await internshipModel
+    .find({}, { _id: 1, title: 1 })
+    .lean();
+
+  return internships.map(({ _id, title }) => ({
+    label: title,
+    value: _id.toString(),
+  }));
+}
+
 /* ============================
    CREATE INTERNSHIP
 ============================ */

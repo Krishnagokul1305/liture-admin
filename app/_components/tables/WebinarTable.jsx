@@ -7,6 +7,7 @@ import DeleteModal from "../DeleteModal";
 import WebinarForm from "../forms/WebinarForm";
 import { deleteWebinarAction } from "@/app/lib/action";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function WebinarTable({ data, pagination }) {
   const editModalRef = useRef(null);
@@ -34,6 +35,21 @@ export default function WebinarTable({ data, pagination }) {
 
       <DataTable
         columnCofig={[
+          {
+            accessorKey: "image",
+            header: "Image",
+            customRender: (value) => {
+              return (
+                <Image
+                  src={value}
+                  height={70}
+                  width={100}
+                  unoptimized
+                  alt="Webinar image"
+                />
+              );
+            },
+          },
           { accessorKey: "title", header: "Title" },
           { accessorKey: "eventDate", header: "Event Date" },
           {

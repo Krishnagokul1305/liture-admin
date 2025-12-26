@@ -5,8 +5,9 @@ import DataTable from "@/components/table/Table";
 import Modal from "../Modal";
 import DeleteModal from "../DeleteModal";
 import UserForm from "../forms/UserForm";
-import { deleteInternshipAction, deleteUserAction } from "@/app/lib/action";
+import { deleteInternshipAction } from "@/app/lib/action";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function InternshipTable({ data, pagination }) {
   const editModalRef = useRef(null);
@@ -34,6 +35,21 @@ export default function InternshipTable({ data, pagination }) {
 
       <DataTable
         columnCofig={[
+          {
+            accessorKey: "image",
+            header: "Image",
+            customRender: (value) => {
+              return (
+                <Image
+                  src={value}
+                  height={70}
+                  width={100}
+                  unoptimized
+                  alt="Internship image"
+                />
+              );
+            },
+          },
           { accessorKey: "title", header: "Title" },
           { accessorKey: "eventDate", header: "EventDate" },
           {

@@ -34,7 +34,11 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const webinarSchema = z.object({
-  image: z.any().optional(),
+  image: z
+    .union([z.instanceof(File), z.string().url()])
+    .refine((val) => val !== null && val !== undefined, {
+      message: "Image is required",
+    }),
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   eventDate: z.date({ message: "Event date is required" }),
@@ -64,31 +68,36 @@ export default function WebinarForm({
 
   const onSubmit = async (data) => {
     try {
+      const formData = new FormData();
+
+      formData.append("title", data.title);
+      formData.append("description", data.description);
+      formData.append("eventDate", data.eventDate.toISOString());
+      formData.append("status", data.status);
+
+      if (data.image instanceof File) {
+        formData.append("image", data.image); // original file
+      }
+
       if (mode === "create") {
-        toast.promise(
-          createWebinarAction({
-            ...data,
-            image: data.image || "https://placehold.co/600x400",
-          }),
-          {
-            loading: "Creating Webinar...",
-            success: "Created Webinar successfully!",
-            error: "Error Creating Webinar",
-          }
-        );
+        toast.promise(createWebinarAction(formData), {
+          loading: "Creating Webinar...",
+          success: "Created Webinar successfully!",
+          error: "Error Creating Webinar",
+        });
       }
 
       if (mode === "edit") {
-        toast.promise(updateWebinarAction(webinarId, data), {
+        toast.promise(updateWebinarAction(webinarId, formData), {
           loading: "Updating Webinar...",
           success: "Updated Webinar successfully!",
           error: "Error Updating Webinar",
         });
       }
+
       router.push("/webinars");
     } catch (err) {
       console.error(err);
-      alert("Something went wrong");
     }
   };
 

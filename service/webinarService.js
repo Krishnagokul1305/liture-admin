@@ -73,6 +73,20 @@ export async function getAllWebinars({
   };
 }
 
+export async function getAllWebinarsMinimal() {
+  await dbConnect();
+
+  const webinars = await webinarModel
+    .find({}, { _id: 1, title: 1 })
+    .lean()
+    .exec();
+
+  return webinars.map((w) => ({
+    value: w._id.toString(),
+    label: w.title,
+  }));
+}
+
 /* ============================
    CREATE WEBINAR
 ============================ */

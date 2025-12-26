@@ -37,7 +37,11 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const internshipSchema = z.object({
-  image: z.any().optional(),
+  image: z
+    .union([z.instanceof(File), z.string().url()])
+    .refine((val) => val !== null && val !== undefined, {
+      message: "Image is required",
+    }),
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   eventDate: z.date({ message: "Event date is required" }),
@@ -67,32 +71,37 @@ export default function InternshipForm({
 
   const onSubmit = async (data) => {
     try {
+      const formData = new FormData();
+
+      formData.append("title", data.title);
+      formData.append("description", data.description);
+      formData.append("status", data.status);
+      formData.append("eventDate", data.eventDate.toISOString());
+
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
+
       if (mode === "create") {
-        toast.promise(
-          createInternshipAction({
-            ...data,
-            image:
-              "https://img.freepik.com/free-photo/courage-man-jump-through-gap-hill-business-concept-idea_1323-262.jpg",
-          }),
-          {
-            loading: "Creating Internship...",
-            success: "Created Internship successfully!",
-            error: "Error Creating Internship",
-          }
-        );
+        toast.promise(createInternshipAction(formData), {
+          loading: "Creating Internship...",
+          success: "Created Internship successfully!",
+          error: "Error Creating Internship",
+        });
       }
 
       if (mode === "edit") {
-        toast.promise(updateInternshipAction(internshipId, data), {
+        toast.promise(updateInternshipAction(internshipId, formData), {
           loading: "Updating Internship...",
           success: "Updated Internship successfully!",
           error: "Error Updating Internship",
         });
       }
+
       router.push("/internships");
     } catch (err) {
       console.error(err);
-      alert("Something went wrong");
+      toast.error("Something went wrong");
     }
   };
 
