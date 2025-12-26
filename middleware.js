@@ -1,4 +1,4 @@
-import { auth } from "@/app/lib/auth";
+import { auth } from "@/app/lib/auth-edge";
 import { NextResponse } from "next/server";
 
 export async function middleware(request) {
@@ -19,11 +19,10 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  const session = await auth();
+  const session = await auth(request);
 
   if (!session) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
