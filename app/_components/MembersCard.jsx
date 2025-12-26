@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import Modal from "./Modal";
 import MembershipForm from "./forms/MemberShipForm";
+import DeleteModal from "./DeleteModal";
+import { deleteInternshipAction, deleteMembershipAction } from "../lib/action";
 
 export default function MembersCard({ membership }) {
   const isInactive = !membership.isActive;
@@ -34,16 +36,28 @@ export default function MembersCard({ membership }) {
             </div>
           ))}
         </div>
-
-        <Modal
-          title="Edit Membership"
-          description="Modify membership information."
-          Trigger={
-            <Button className="flex-1 border-border w-full">Edit</Button>
-          }
-        >
-          <MembershipForm initialData={membership} mode="edit" />
-        </Modal>
+        <div className="space-y-3">
+          <Modal
+            title="Edit Membership"
+            description="Modify membership information."
+            Trigger={
+              <Button
+                className="flex-1 border-border w-full"
+                variant={"outline"}
+              >
+                Edit
+              </Button>
+            }
+          >
+            <MembershipForm initialData={membership} mode="edit" />
+          </Modal>
+          <DeleteModal
+            onDelete={async () => await deleteMembershipAction(membership?._id)}
+            trigger={
+              <Button className="flex-1 border-border w-full">Delete</Button>
+            }
+          />
+        </div>
       </div>
     </div>
   );

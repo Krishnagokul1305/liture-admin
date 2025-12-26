@@ -23,6 +23,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  createMembershipAction,
+  updateMembershipAction,
+} from "@/app/lib/action";
+import { toast } from "sonner";
 
 const membershipSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -33,8 +38,8 @@ const membershipSchema = z.object({
 
 export default function MembershipForm({
   mode = "create", // "create" | "edit"
+  close,
   initialData = null,
-  onSubmit,
 }) {
   const form = useForm({
     resolver: zodResolver(membershipSchema),
@@ -52,7 +57,24 @@ export default function MembershipForm({
   });
 
   const handleSubmit = (data) => {
-    onSubmit?.(data);
+    try {
+      if (mode == "create") {
+        toast.promise(createMembershipAction(data), {
+          loading: "Updating Internship...",
+          success: "Updated Internship successfully!",
+          error: "Error Updating Internship",
+        });
+      } else {
+        toast.promise(updateMembershipAction(initialData._id, data), {
+          loading: "Updating Internship...",
+          success: "Updated Internship successfully!",
+          error: "Error Updating Internship",
+        });
+      }
+      close();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (

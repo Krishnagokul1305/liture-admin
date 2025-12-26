@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Users, Briefcase, Video } from "lucide-react";
+import { Home, Users, Briefcase, Video, FilePlus } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -36,6 +36,25 @@ const data = {
       title: "Webinars",
       url: "webinars",
       icon: Video,
+    },
+    {
+      title: "Registrations",
+      url: "#",
+      icon: FilePlus,
+      items: [
+        {
+          title: "Internships",
+          url: "/registrations/internships",
+        },
+        {
+          title: "Webinar",
+          url: "/registrations/webinars",
+        },
+        {
+          title: "Memberships",
+          url: "/registrations/memberships",
+        },
+      ],
     },
     {
       title: "Users",

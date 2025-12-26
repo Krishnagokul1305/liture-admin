@@ -24,6 +24,11 @@ import {
   updateWebinar,
   deleteWebinar,
 } from "@/service/webinarService";
+import {
+  createMembership,
+  deleteMembership,
+  updateMembership,
+} from "@/service/membershipService";
 
 export async function signInAction(data) {
   await signIn("credentials", {
@@ -140,4 +145,19 @@ export async function updateWebinarAction(id, data) {
 export async function deleteWebinarAction(id) {
   await deleteWebinar(id);
   revalidatePath("/webinars");
+}
+
+export async function createMembershipAction(data) {
+  await createMembership(data);
+  revalidatePath("/membership");
+}
+
+export async function deleteMembershipAction(id) {
+  await deleteMembership(id);
+  revalidatePath("/membership");
+}
+
+export async function updateMembershipAction(id, data) {
+  await updateMembership(id, data);
+  revalidatePath("/membership");
 }

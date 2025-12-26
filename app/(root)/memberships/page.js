@@ -5,6 +5,7 @@ import { hasCurrentUserRole } from "@/service/userService";
 import Modal from "@/app/_components/Modal";
 import MembersCard from "@/app/_components/MembersCard";
 import MembershipForm from "@/app/_components/forms/MemberShipForm";
+import { getAllMemberships } from "@/service/membershipService";
 
 async function page({ searchParams }) {
   if (!(await hasCurrentUserRole("SUPERADMIN", "ADMIN"))) {
@@ -78,6 +79,8 @@ async function page({ searchParams }) {
     },
   ];
 
+  const data = await getAllMemberships();
+
   return (
     <div className="space-y-5">
       <div className="flex md:items-center  flex-col lg:flex-row justify-between mb-6">
@@ -101,11 +104,18 @@ async function page({ searchParams }) {
           <MembershipForm />
         </Modal>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {MOCK_MEMBERSHIPS.map((membership) => (
-          <MembersCard key={membership.id} membership={membership} />
-        ))}
-      </div>
+      {data?.length == 0 ? (
+        <EmptyState
+          title="No Memberships yet"
+          message="There aren't any memberships at the moment"
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {data.map((membership) => (
+            <MembersCard key={membership._id} membership={membership} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
