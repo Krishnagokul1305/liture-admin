@@ -30,6 +30,11 @@ import {
   updateMembership,
 } from "@/service/membershipService";
 import { uploadImageToS3 } from "./s3";
+import {
+  createRegistration,
+  deleteRegistration,
+  updateRegistration,
+} from "@/service/registrationService";
 
 export async function signInAction(data) {
   await signIn("credentials", {
@@ -226,4 +231,19 @@ export async function deleteMembershipAction(id) {
 export async function updateMembershipAction(id, data) {
   await updateMembership(id, data);
   revalidatePath("/membership");
+}
+
+export async function createRegistrationAction(data) {
+  await createRegistration(data);
+  revalidatePath(`/registrations/${data?.type}s`);
+}
+
+export async function deleteRegistrationAction(id, type) {
+  await deleteRegistration(id);
+  revalidatePath(`/registrations/${type}`);
+}
+
+export async function updateRegistrationAction(id, data, type) {
+  await updateRegistration(id, data);
+  revalidatePath(`/registrations/${type}s`);
 }

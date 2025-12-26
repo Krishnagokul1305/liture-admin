@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,32 +24,43 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  createRegistrationAction,
+  updateRegistrationAction,
+  // updateRegistrationAction,
+} from "@/app/lib/action";
+import { useRouter } from "next/navigation";
 
 const registrationSchema = z
   .object({
-    fullName: z.string().min(1, "Full name is required"),
-    email: z.string().email("Invalid email address"),
-    phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
-    reason: z.string().min(1, "Reason is required"),
-    type: z.enum(["internship", "webinar"], {
-      message: "Please select a type",
-    }),
+    fullName: z.string().min(1),
+    email: z.string().email(),
+    phoneNumber: z.string().min(10),
+    reason: z.string().min(1),
+    type: z.enum(["internship", "webinar"]),
     internship: z.string().optional(),
     webinar: z.string().optional(),
   })
   .refine(
-    (data) => {
-      if (data.type === "internship") return !!data.internship;
-      if (data.type === "webinar") return !!data.webinar;
-      return true;
-    },
-    { message: "Please select an option", path: ["internship"] }
+    (data) =>
+      data.type === "internship"
+        ? !!data.internship
+        : data.type === "webinar"
+        ? !!data.webinar
+        : true,
+    { message: "Please select an option" }
   );
 
-export default function RegistrationForm() {
-  const router = useRouter();
+export default function RegistrationForm({
+  mode = "create",
+  registrationId,
+  initialData,
+}) {
+  const isView = mode === "view";
+  const isEdit = mode === "edit";
+  const isCreate = mode === "create";
+
   const [submitting, setSubmitting] = useState(false);
 
   const form = useForm({
@@ -64,10 +75,26 @@ export default function RegistrationForm() {
       webinar: "",
     },
   });
+  const router = useRouter();
+  const type = initialData?.type;
+  /* -------------------- hydrate initial data -------------------- */
+  useEffect(() => {
+    if (!initialData) return;
+
+    form.reset({
+      fullName: initialData.fullName,
+      email: initialData.email,
+      phoneNumber: initialData.phoneNumber,
+      reason: initialData.reason,
+      type: initialData.type,
+      internship: initialData.internship?._id ?? "",
+      webinar: initialData.webinar?._id ?? "",
+    });
+  }, [initialData, form]);
 
   const typeValue = form.watch("type");
 
-  // Fetch internships
+  /* -------------------- options fetch -------------------- */
   const { data: internshipsData, isLoading: loadingInternships } = useQuery({
     queryKey: ["internships"],
     queryFn: async () => {
@@ -75,10 +102,9 @@ export default function RegistrationForm() {
       const data = await res.json();
       return data.success ? data.data : [];
     },
-    enabled: typeValue === "internship",
+    enabled: typeValue === "internship" && !isView,
   });
 
-  // Fetch webinars
   const { data: webinarsData, isLoading: loadingWebinars } = useQuery({
     queryKey: ["webinars"],
     queryFn: async () => {
@@ -86,78 +112,57 @@ export default function RegistrationForm() {
       const data = await res.json();
       return data.success ? data.data : [];
     },
-    enabled: typeValue === "webinar",
+    enabled: typeValue === "webinar" && !isView,
   });
+
   const options =
     typeValue === "internship" ? internshipsData || [] : webinarsData || [];
   const loadingOptions =
     typeValue === "internship" ? loadingInternships : loadingWebinars;
 
+  /* -------------------- submit -------------------- */
   const onSubmit = async (data) => {
     setSubmitting(true);
-    try {
-      const response = await fetch("/api/registrations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
 
-      if (!response.ok) throw new Error("Failed to register");
+    const action = isCreate
+      ? createRegistrationAction(data)
+      : updateRegistrationAction(registrationId, data, type);
 
-      toast.success("Registration successful!");
-      router.push("/success");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to submit registration");
-    } finally {
-      setSubmitting(false);
-    }
+    toast.promise(action, {
+      loading: isEdit ? "Updating registration..." : "Creating registration...",
+      success: isEdit ? "Registration updated!" : "Registration created!",
+      error: "Something went wrong",
+    });
+
+    setSubmitting(false);
+    router.back();
   };
-
-  console.log(internshipsData);
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Personal Info */}
-        <div className="grid md:gap-4 md:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="fullName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Full Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter your full name"
-                    className={"py-6"}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    className={"py-6"}
-                    placeholder="Enter your email"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <div className="grid md:grid-cols-2 gap-4">
+          {["fullName", "email"].map((name) => (
+            <FormField
+              key={name}
+              control={form.control}
+              name={name}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {name === "fullName" ? "Full Name" : "Email"}
+                  </FormLabel>
+                  <FormControl>
+                    <Input disabled={isView} {...field} className="py-6" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
         </div>
+
         <FormField
           control={form.control}
           name="phoneNumber"
@@ -165,19 +170,14 @@ export default function RegistrationForm() {
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input
-                  className={"py-6"}
-                  type="tel"
-                  placeholder="Enter your phone number"
-                  {...field}
-                />
+                <Input disabled={isView} {...field} className="py-6" />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Type Selection */}
+        {/* Type */}
         <FormField
           control={form.control}
           name="type"
@@ -185,14 +185,13 @@ export default function RegistrationForm() {
             <FormItem>
               <FormLabel>Type</FormLabel>
               <Select
-                onValueChange={field.onChange}
                 value={field.value}
-                className={"py-6"}
-                disabled={submitting}
+                onValueChange={field.onChange}
+                disabled={isView}
               >
                 <FormControl>
-                  <SelectTrigger className="w-full py-6">
-                    <SelectValue placeholder="Select type" />
+                  <SelectTrigger className="py-6 w-full">
+                    <SelectValue />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -200,14 +199,27 @@ export default function RegistrationForm() {
                   <SelectItem value="webinar">Webinar</SelectItem>
                 </SelectContent>
               </Select>
-              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Opportunity Selection */}
-        {loadingInternships || loadingWebinars ? (
-          <Skeleton className={"w-full h-16"} />
+        {isView ? (
+          <div className="space-y-2">
+            <FormLabel>
+              {typeValue === "internship" ? "Internship" : "Webinar"}
+            </FormLabel>
+            <Input
+              disabled
+              value={
+                typeValue === "internship"
+                  ? initialData?.internship?.title || ""
+                  : initialData?.webinar?.title || ""
+              }
+              className="py-6"
+            />
+          </div>
+        ) : loadingOptions ? (
+          <Skeleton className="h-16 w-full" />
         ) : (
           <FormField
             control={form.control}
@@ -215,36 +227,24 @@ export default function RegistrationForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  {typeValue === "internship"
-                    ? "Select Internship"
-                    : "Select Webinar"}
+                  {typeValue === "internship" ? "Internship" : "Webinar"}
                 </FormLabel>
                 <Select
+                  value={field.value}
                   onValueChange={field.onChange}
-                  value={field.value || ""}
-                  disabled={loadingOptions || submitting}
+                  disabled={submitting}
                 >
                   <FormControl>
-                    <SelectTrigger className="w-full py-6">
-                      <SelectValue
-                        placeholder={
-                          loadingOptions ? "Loading..." : `Select ${typeValue}`
-                        }
-                      />
+                    <SelectTrigger className="py-6 w-full">
+                      <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {options.length > 0 ? (
-                      options.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="" disabled>
-                        {loadingOptions ? "Loading..." : "No options available"}
+                    {options.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
                       </SelectItem>
-                    )}
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -259,19 +259,20 @@ export default function RegistrationForm() {
           name="reason"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Why are you interested?</FormLabel>
+              <FormLabel>Reason</FormLabel>
               <FormControl>
-                <Textarea placeholder="Tell us why" {...field} rows={4} />
+                <Textarea disabled={isView} {...field} rows={4} />
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
 
         {/* Submit */}
-        <Button type="submit" disabled={submitting}>
-          {submitting ? "Submitting..." : "Submit Registration"}
-        </Button>
+        {!isView && (
+          <Button type="submit" disabled={submitting}>
+            {isEdit ? "Update Registration" : "Submit Registration"}
+          </Button>
+        )}
       </form>
     </Form>
   );

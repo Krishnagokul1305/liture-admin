@@ -2,28 +2,20 @@
 
 import { useRef, useState } from "react";
 import DataTable from "@/components/table/Table";
-import Modal from "../Modal";
 import DeleteModal from "../DeleteModal";
-export default function RegistrationTable({ data, pagination }) {
-  const editModalRef = useRef(null);
+import { deleteRegistrationAction } from "@/app/lib/action";
+import { useRouter } from "next/navigation";
+export default function RegistrationTable({ data, pagination, type }) {
   const deleteModalRef = useRef(null);
-
+  const router = useRouter();
   const [selectedRow, setSelectedRow] = useState(null);
 
   return (
     <div className="bg-sidebar rounded-lg">
-      <Modal
-        ref={editModalRef}
-        title="Edit Registration"
-        description="Update registration details"
-      >
-        <div>hello</div>
-      </Modal>
-
       <DeleteModal
         ref={deleteModalRef}
         onDelete={async () => {
-          console.log("hello");
+          await deleteRegistrationAction(selectedRow?._id, type);
         }}
       />
 
@@ -41,10 +33,15 @@ export default function RegistrationTable({ data, pagination }) {
         pagination={pagination}
         actionItems={(row) => [
           {
+            label: "view",
+            action: () => {
+              router.push(`/registrations/${row?._id}?mode=view`);
+            },
+          },
+          {
             label: "Edit",
             action: () => {
-              setSelectedRow(row);
-              editModalRef.current?.open();
+              router.push(`/registrations/${row?._id}?mode=edit`);
             },
           },
           {

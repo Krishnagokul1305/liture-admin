@@ -3,8 +3,21 @@ import registrationModel from "@/app/lib/model/registration.model";
 import { formatDateTime } from "@/app/utils/helper";
 
 export async function createRegistration(data) {
-  const registration = await registrationModel.create(data);
-  return registration;
+  await dbConnect();
+
+  const createData = { ...data };
+
+  if (createData.webinar === "") delete createData.webinar;
+  if (createData.internship === "") delete createData.internship;
+  if (createData.type === "internship") {
+    delete createData.webinar;
+  }
+
+  if (createData.type === "webinar") {
+    delete createData.internship;
+  }
+
+  return registrationModel.create(createData);
 }
 
 export async function getAllRegistrations({
@@ -88,7 +101,7 @@ export async function getRegistrationById(id) {
     .lean();
 
   if (!registration) throw new Error("Registration not found");
-
+  console.log(registration);
   return {
     ...registration,
     _id: registration._id.toString(),
@@ -110,7 +123,30 @@ export async function getRegistrationById(id) {
 
 export async function updateRegistration(id, data) {
   await dbConnect();
-  return registrationModel.findByIdAndUpdate(id, data, {
+
+  const update = { ...data };
+  const unset = {};
+
+  // Remove empty strings
+  if (update.webinar === "") delete update.webinar;
+  if (update.internship === "") delete update.internship;
+
+  // 🔥 Enforce mutual exclusivity
+  if (update.type === "internship") {
+    unset.webinar = 1;
+    delete update.webinar; // ⬅️ IMPORTANT
+  }
+
+  if (update.type === "webinar") {
+    unset.internship = 1;
+    delete update.internship; // ⬅️ IMPORTANT
+  }
+
+  const updateQuery = Object.keys(unset).length
+    ? { $set: update, $unset: unset }
+    : { $set: update };
+
+  return registrationModel.findByIdAndUpdate(id, updateQuery, {
     new: true,
     runValidators: true,
   });

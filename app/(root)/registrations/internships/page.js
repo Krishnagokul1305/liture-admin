@@ -49,6 +49,7 @@ async function page({ searchParams }) {
         />
       ) : (
         <RegistrationTable
+          type={"internships"}
           data={data?.registrations}
           pagination={data?.pagination}
         />

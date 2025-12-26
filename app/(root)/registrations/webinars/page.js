@@ -10,11 +10,9 @@ async function page({ searchParams }) {
   if (!(await hasCurrentUserRole("SUPERADMIN", "ADMIN"))) {
     throw new Error("Unauthorized");
   }
-
   const searchs = await searchParams;
   const params = { ...searchs, type: "webinar" }; // set type to webinar
   const data = await getAllRegistrations(params);
-
   return (
     <div className="space-y-5">
       <div className="flex md:items-center flex-col lg:flex-row justify-between mb-6">
@@ -48,6 +46,7 @@ async function page({ searchParams }) {
         />
       ) : (
         <RegistrationTable
+          type={"webinars"}
           data={data?.registrations}
           pagination={data?.pagination}
         />
