@@ -1,7 +1,5 @@
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
-  CardAction,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -11,9 +9,9 @@ import { getDashboardStats } from "@/service/statsService";
 
 const dashboardStats = [
   {
-    key: "users",
-    label: "Users",
-    footer: "Registered platform users",
+    key: "webinars",
+    label: "Webinars",
+    footer: "Upcoming & completed sessions",
   },
   {
     key: "internships",
@@ -26,9 +24,9 @@ const dashboardStats = [
     footer: "Active paid memberships",
   },
   {
-    key: "webinars",
-    label: "Webinars",
-    footer: "Upcoming & completed sessions",
+    key: "membershipRegistrations",
+    label: "Member Signups",
+    footer: "Total membership registrations",
   },
 ];
 
