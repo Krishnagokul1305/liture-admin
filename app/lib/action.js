@@ -45,7 +45,7 @@ export async function signInAction(data) {
   await signIn("credentials", {
     email: data.email,
     password: data.password,
-    redirect: false,
+    redirectTo: "/",
   });
 }
 

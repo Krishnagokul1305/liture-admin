@@ -26,9 +26,10 @@ export function LoginForm({ className, ...props }) {
     try {
       await signInAction(data);
       toast.success("Logged in successfully");
-      router.push("/");
     } catch (error) {
-      toast.error("Something went wrong");
+      if (error?.digest?.startsWith("NEXT_REDIRECT")) return;
+
+      toast.error(error.message || "Invalid email or password");
     }
   };
 
