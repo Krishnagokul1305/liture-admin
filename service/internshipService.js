@@ -18,7 +18,6 @@ export async function getAllInternships({
     query.status = status;
   }
 
-  // 🔍 Search by title / description
   if (search) {
     query.$or = [
       { title: { $regex: search, $options: "i" } },

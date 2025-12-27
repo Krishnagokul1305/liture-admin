@@ -7,82 +7,49 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getDashboardStats } from "@/service/statsService";
 
-export default function DashboardStats() {
+const dashboardStats = [
+  {
+    key: "users",
+    label: "Users",
+    footer: "Registered platform users",
+  },
+  {
+    key: "internships",
+    label: "Internships",
+    footer: "Active internship opportunities",
+  },
+  {
+    key: "memberships",
+    label: "Memberships",
+    footer: "Active paid memberships",
+  },
+  {
+    key: "webinars",
+    label: "Webinars",
+    footer: "Upcoming & completed sessions",
+  },
+];
+
+export default async function DashboardStats() {
+  const data = await getDashboardStats();
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Total Revenue</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            $1,250.00
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline">+12.5%</Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month
-          </div>
-          <div className="text-muted-foreground">
-            Visitors for the last 6 months
-          </div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>New Customers</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            1,234
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline">-20%</Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Down 20% this period
-          </div>
-          <div className="text-muted-foreground">
-            Acquisition needs attention
-          </div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Active Accounts</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            45,678
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline">+12.5%</Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong user retention
-          </div>
-          <div className="text-muted-foreground">Engagement exceed targets</div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Growth Rate</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            4.5%
-          </CardTitle>
-          <CardAction>
-            <Badge variant="outline">+4.5%</Badge>
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Steady performance increase
-          </div>
-          <div className="text-muted-foreground">Meets growth projections</div>
-        </CardFooter>
-      </Card>
+      {dashboardStats.map((stat) => (
+        <Card key={stat.key} className="@container/card">
+          <CardHeader>
+            <CardDescription>{stat.label}</CardDescription>
+            <CardTitle className="text-4xl font-semibold md:text-3xl">
+              {data?.[stat.key] ?? "0"}
+            </CardTitle>
+          </CardHeader>
+
+          <CardFooter className="text-sm text-muted-foreground">
+            {stat.footer}
+          </CardFooter>
+        </Card>
+      ))}
     </div>
   );
 }

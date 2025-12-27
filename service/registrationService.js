@@ -262,3 +262,29 @@ export async function getPastRegistrationStats() {
 
   return days;
 }
+
+export async function getRecentRegistrations(limit = 5) {
+  await dbConnect();
+
+  const registrations = await registrationModel
+    .find()
+    .sort({ createdAt: -1 }) // newest first
+    .limit(limit)
+    .populate("internship", "title eventDate")
+    .populate("webinar", "title eventDate")
+    .lean();
+
+  return registrations.map((reg) => ({
+    _id: reg._id.toString(),
+    fullName: reg.fullName,
+    email: reg.email,
+    phoneNumber: reg.phoneNumber,
+    reason: reg.reason,
+    type: reg.type,
+    title:
+      reg.type === "internship"
+        ? reg.internship?.title ?? null
+        : reg.webinar?.title ?? null,
+    createdAt: formatDateTime(reg.createdAt)?.date,
+  }));
+}

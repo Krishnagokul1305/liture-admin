@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 
 export default function Error({ error, reset }) {
-  console.log(error);
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="max-w-md w-full space-y-6 text-center">
@@ -17,7 +16,8 @@ export default function Error({ error, reset }) {
             Something went wrong
           </h1>
           <p className="text-muted-foreground">
-            {error.message || "An unexpected error occurred. Please try again."}
+            {error?.message ||
+              "An unexpected error occurred. Please try again."}
           </p>
         </div>
 
