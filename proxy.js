@@ -1,5 +1,5 @@
-import { auth } from "@/app/lib/auth-edge";
 import { NextResponse } from "next/server";
+import { auth } from "@/app/lib/auth";
 
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
@@ -10,7 +10,6 @@ export async function proxy(request) {
     "/reset-password",
     "/auth/login",
   ];
-
   const isPublicRoute = publicRoutes.some((route) =>
     pathname.startsWith(route)
   );
@@ -19,7 +18,7 @@ export async function proxy(request) {
     return NextResponse.next();
   }
 
-  const session = await auth(request);
+  const session = await auth();
 
   if (!session) {
     return NextResponse.redirect(new URL("/login", request.url));
