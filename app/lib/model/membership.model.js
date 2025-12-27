@@ -18,7 +18,6 @@ const membershipSchema = new mongoose.Schema(
         type: String,
       },
     ],
-
     isActive: {
       type: Boolean,
       default: true,

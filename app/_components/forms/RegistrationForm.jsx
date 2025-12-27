@@ -135,6 +135,7 @@ export default function RegistrationForm({
     });
 
     setSubmitting(false);
+    router.refresh();
     router.back();
   };
 

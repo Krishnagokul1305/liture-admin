@@ -156,3 +156,109 @@ export async function deleteRegistration(id) {
   await dbConnect();
   return registrationModel.findByIdAndDelete(id);
 }
+
+export async function getPastRegistrationStats() {
+  await dbConnect();
+
+  const today = new Date();
+  const endUTC = new Date(
+    Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate(),
+      23,
+      59,
+      59,
+      999
+    )
+  );
+
+  const startUTC = new Date(
+    Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate() - 9,
+      0,
+      0,
+      0,
+      0
+    )
+  );
+
+  const results = await registrationModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: startUTC,
+          $lte: endUTC,
+        },
+      },
+    },
+
+    {
+      $group: {
+        _id: {
+          date: {
+            $dateToString: {
+              format: "%Y-%m-%d",
+              date: "$createdAt",
+              timezone: "UTC",
+            },
+          },
+          type: "$type",
+        },
+        count: { $sum: 1 },
+      },
+    },
+
+    {
+      $group: {
+        _id: "$_id.date",
+        webinar: {
+          $sum: {
+            $cond: [{ $eq: ["$_id.type", "webinar"] }, "$count", 0],
+          },
+        },
+        internship: {
+          $sum: {
+            $cond: [{ $eq: ["$_id.type", "internship"] }, "$count", 0],
+          },
+        },
+      },
+    },
+
+    {
+      $project: {
+        _id: 0,
+        date: "$_id",
+        webinar: 1,
+        internship: 1,
+      },
+    },
+
+    { $sort: { date: 1 } },
+  ]);
+
+  // Fill missing days
+  const days = [];
+  for (let i = 9; i >= 0; i--) {
+    const d = new Date(
+      Date.UTC(
+        today.getUTCFullYear(),
+        today.getUTCMonth(),
+        today.getUTCDate() - i
+      )
+    );
+    const dateStr = d.toISOString().slice(0, 10);
+
+    const found = results.find((r) => r.date === dateStr);
+
+    days.push({
+      date: dateStr,
+      webinar: found?.webinar ?? 0,
+      internship: found?.internship ?? 0,
+    });
+  }
+
+  return days;
+}

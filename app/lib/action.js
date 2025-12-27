@@ -35,6 +35,11 @@ import {
   deleteRegistration,
   updateRegistration,
 } from "@/service/registrationService";
+import {
+  createMembershipRegistration,
+  deleteMembershipRegistration,
+  updateMembershipRegistration,
+} from "@/service/membershipRegistrationService";
 
 export async function signInAction(data) {
   await signIn("credentials", {
@@ -246,4 +251,19 @@ export async function deleteRegistrationAction(id, type) {
 export async function updateRegistrationAction(id, data, type) {
   await updateRegistration(id, data);
   revalidatePath(`/registrations/${type}s`);
+}
+
+export async function updateMembershipRegistrationAction(id, data) {
+  await updateMembershipRegistration(id, data);
+  revalidatePath("/registrations/memberships");
+}
+
+export async function deleteMembershipRegistrationAction(id) {
+  await deleteMembershipRegistration(id);
+  revalidatePath("/registrations/memberships");
+}
+
+export async function createMembershipRegistrationAction(data) {
+  await createMembershipRegistration(data);
+  revalidatePath("/registrations/memberships");
 }

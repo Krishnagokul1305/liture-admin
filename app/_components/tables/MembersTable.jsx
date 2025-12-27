@@ -2,7 +2,7 @@
 
 import DataTable from "@/components/table/Table";
 
-export default function membersTable({ data }) {
+export default function MembersTable({ data }) {
   return (
     <div className="bg-sidebar rounded-lg">
       <DataTable
