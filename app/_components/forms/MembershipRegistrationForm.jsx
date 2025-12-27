@@ -75,7 +75,6 @@ export default function MembershipRegistrationForm({
           success: "Registration created!",
           error: "Something went wrong",
         });
-        toast.success("Registration created!");
       } else {
         toast.promise(
           updateMembershipRegistrationAction(registrationId, data),
