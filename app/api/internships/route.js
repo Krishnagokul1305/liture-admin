@@ -5,7 +5,9 @@ import { NextResponse } from "next/server";
 export async function GET(req, res) {
   try {
     await dbConnect();
-    const internships = await internshipModel.find();
+    const internships = await internshipModel.find({
+      status: "active",
+    });
     return NextResponse.json(
       {
         status: "success",

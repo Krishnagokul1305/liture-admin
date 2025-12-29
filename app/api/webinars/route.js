@@ -5,7 +5,9 @@ import { NextResponse } from "next/server";
 export async function GET(req) {
   try {
     await dbConnect();
-    const data = await webinarModel.find();
+    const data = await webinarModel.find({
+      status: "active",
+    });
 
     return NextResponse.json(
       {

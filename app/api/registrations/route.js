@@ -11,7 +11,6 @@ export async function POST(req) {
     const { fullName, email, phoneNumber, reason, type, internship, webinar } =
       body;
 
-    // 🔒 Basic validation
     if (!fullName || !email || !phoneNumber || !reason || !type) {
       return NextResponse.json(
         { message: "Missing required fields" },
