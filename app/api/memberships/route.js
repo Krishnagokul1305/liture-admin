@@ -12,7 +12,14 @@ export async function GET() {
 
     return NextResponse.json(
       { success: true, data: memberships },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      }
     );
   } catch (error) {
     return NextResponse.json(

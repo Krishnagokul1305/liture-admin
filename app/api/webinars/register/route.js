@@ -12,7 +12,14 @@ export async function POST(req) {
     if (!fullName || !email || !phoneNumber || !reason || !webinar) {
       return NextResponse.json(
         { success: false, message: "All fields are required" },
-        { status: 400 }
+        {
+          status: 400,
+          headers: {
+            "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+            "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        }
       );
     }
 
@@ -20,7 +27,14 @@ export async function POST(req) {
     if (!webinarExists) {
       return NextResponse.json(
         { success: false, message: "Invalid webinar ID" },
-        { status: 404 }
+        {
+          status: 404,
+          headers: {
+            "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+            "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        }
       );
     }
 
@@ -35,12 +49,26 @@ export async function POST(req) {
 
     return NextResponse.json(
       { success: true, data: registration },
-      { status: 201 }
+      {
+        status: 201,
+        headers: {
+          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      }
     );
   } catch (error) {
     return NextResponse.json(
       { success: false, message: error.message },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      }
     );
   }
 }

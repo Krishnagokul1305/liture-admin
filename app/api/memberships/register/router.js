@@ -16,7 +16,14 @@ export async function POST(req) {
           success: false,
           message: "All fields are required",
         },
-        { status: 400 }
+        {
+          status: 400,
+          headers: {
+            "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+            "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        }
       );
     }
 
@@ -30,7 +37,14 @@ export async function POST(req) {
           success: false,
           message: "Invalid membership selected",
         },
-        { status: 404 }
+        {
+          status: 404,
+          headers: {
+            "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+            "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        }
       );
     }
 
@@ -46,7 +60,14 @@ export async function POST(req) {
           success: false,
           message: "You have already registered for this membership",
         },
-        { status: 409 }
+        {
+          status: 409,
+          headers: {
+            "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+            "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type",
+          },
+        }
       );
     }
 
@@ -65,7 +86,14 @@ export async function POST(req) {
         message: "Membership registration successful",
         data: registration,
       },
-      { status: 201 }
+      {
+        status: 201,
+        headers: {
+          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      }
     );
   } catch (error) {
     return NextResponse.json(
@@ -73,7 +101,14 @@ export async function POST(req) {
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      }
     );
   }
 }

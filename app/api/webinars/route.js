@@ -14,7 +14,14 @@ export async function GET(req) {
         status: "success",
         data,
       },
-      { status: 200 }
+      {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      }
     );
   } catch (error) {
     console.error(error);
@@ -24,7 +31,14 @@ export async function GET(req) {
         status: "error",
         message: error.message || "Something went wrong",
       },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
+          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      }
     );
   }
 }
