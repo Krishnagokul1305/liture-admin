@@ -2,6 +2,12 @@ import dbConnect from "@/app/lib/db";
 import internshipModel from "@/app/lib/model/internship.model";
 import { NextResponse } from "next/server";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
 export async function GET(req, res) {
   try {
     await dbConnect();
@@ -15,11 +21,7 @@ export async function GET(req, res) {
       },
       {
         status: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
-          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
+        headers: corsHeaders,
       }
     );
   } catch (error) {
@@ -30,11 +32,7 @@ export async function GET(req, res) {
       },
       {
         status: 500,
-        headers: {
-          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
-          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
+        headers: corsHeaders,
       }
     );
   }

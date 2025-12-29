@@ -3,6 +3,12 @@ import internshipModel from "@/app/lib/model/internship.model";
 import registrationModel from "@/app/lib/model/registration.model";
 import { NextResponse } from "next/server";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
 export async function POST(req) {
   try {
     await dbConnect();
@@ -15,11 +21,7 @@ export async function POST(req) {
         { success: false, message: "All fields are required" },
         {
           status: 400,
-          headers: {
-            "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
-            "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-          },
+          headers: corsHeaders,
         }
       );
     }
@@ -30,11 +32,7 @@ export async function POST(req) {
         { success: false, message: "Invalid internship ID" },
         {
           status: 404,
-          headers: {
-            "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
-            "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type",
-          },
+          headers: corsHeaders,
         }
       );
     }
@@ -52,11 +50,7 @@ export async function POST(req) {
       { success: true, data: registration },
       {
         status: 201,
-        headers: {
-          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
-          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
+        headers: corsHeaders,
       }
     );
   } catch (error) {
@@ -64,11 +58,7 @@ export async function POST(req) {
       { success: false, message: error.message },
       {
         status: 500,
-        headers: {
-          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
-          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
+        headers: corsHeaders,
       }
     );
   }

@@ -2,9 +2,16 @@ import dbConnect from "@/app/lib/db";
 import webinarModel from "@/app/lib/model/webinar.model";
 import { NextResponse } from "next/server";
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
 export async function GET(req) {
   try {
     await dbConnect();
+
     const data = await webinarModel.find({
       status: "active",
     });
@@ -16,11 +23,7 @@ export async function GET(req) {
       },
       {
         status: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
-          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
+        headers: corsHeaders,
       }
     );
   } catch (error) {
@@ -33,11 +36,7 @@ export async function GET(req) {
       },
       {
         status: 500,
-        headers: {
-          "Access-Control-Allow-Origin": "*", // allow all origins (for dev)
-          "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
+        headers: corsHeaders,
       }
     );
   }
