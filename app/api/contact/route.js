@@ -9,6 +9,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 };
 
+export async function OPTIONS() {
+  return NextResponse.json(
+    {},
+    {
+      status: 200,
+      headers: corsHeaders,
+    }
+  );
+}
+
 export async function POST(req) {
   try {
     const body = await req.json();
