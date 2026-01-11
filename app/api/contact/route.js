@@ -36,7 +36,7 @@ export async function POST(req) {
       to: process.env.EMAIL_RECEIVE,
       subject: "New Contact Form Submission",
       html: `
-  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Fira Sans','Droid Sans','Helvetica Neue',sans-serif;
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Fira Sans','Droid Sans','Helvetica Neue',sans-serif;
               background-color:#ffffff; color:#1f2937; line-height:1.6;">
 
     <!-- Header -->
@@ -60,36 +60,51 @@ export async function POST(req) {
     <div style="max-width:600px; margin:0 auto; padding:40px;">
 
       <!-- User Info -->
-      <div style="margin-bottom:40px;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
-          <tr>
-            <td width="50%">
-              <p style="margin:0 0 8px 0; font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase;">
-                From
-              </p>
-              <p style="margin:0; font-size:16px; font-weight:500; color:#111827;">
-                ${name}
-              </p>
-            </td>
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:40px;">
+  <!-- From -->
+  <tr>
+    <td style="padding-bottom:16px;">
+      <p style="margin:0 0 4px 0; font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase;">
+        From
+      </p>
+      <p style="margin:0; font-size:16px; font-weight:500; color:#111827;">
+        ${name}
+      </p>
+    </td>
+  </tr>
 
-            <td width="50%">
-              <p style="margin:0 0 8px 0; font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase;">
-                Email
-              </p>
-              <a href="mailto:${email}" style="font-size:16px; color:#2563eb; text-decoration:none; font-weight:500;">
-                ${email}
-              </a>
-            </td>
-          </tr>
-        </table>
+  <!-- Email -->
+  <tr>
+    <td style="padding-bottom:16px;">
+      <p style="margin:0 0 4px 0; font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase;">
+        Email
+      </p>
+      <a
+        href="mailto:${email}"
+        style="font-size:16px; color:#2563eb; text-decoration:none; font-weight:500;"
+      >
+        ${email}
+      </a>
+    </td>
+  </tr>
 
-        <p style="margin:0 0 8px 0; font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase;">
-          Phone
-        </p>
-        <a href="tel:${phone}" style="font-size:16px; color:#2563eb; text-decoration:none; font-weight:500;">
-          ${phone}
-        </a>
-      </div>
+  <!-- Phone -->
+  <tr>
+    <td>
+      <p style="margin:0 0 4px 0; font-size:11px; font-weight:700; color:#9ca3af; text-transform:uppercase;">
+        Phone
+      </p>
+      <a
+        href="tel:${phone}"
+        style="font-size:16px; color:#2563eb; text-decoration:none; font-weight:500;"
+      >
+        ${phone}
+      </a>
+    </td>
+  </tr>
+</table>
+
+
 
       <!-- Message -->
       <div style="margin-bottom:40px;">
