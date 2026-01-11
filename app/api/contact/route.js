@@ -3,6 +3,12 @@ import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": process.env.NEXT_FRONTEND_URL,
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -11,7 +17,7 @@ export async function POST(req) {
     if (!name || !email || !message) {
       return NextResponse.json(
         { success: false, message: "Missing fields" },
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -99,12 +105,18 @@ export async function POST(req) {
   `,
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json(
+      { success: true },
+      {
+        status: 200,
+        headers: corsHeaders,
+      }
+    );
   } catch (error) {
     console.error("Contact email error:", error);
     return NextResponse.json(
       { success: false, message: "Email failed" },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
