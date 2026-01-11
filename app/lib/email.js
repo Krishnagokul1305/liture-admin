@@ -1,26 +1,35 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
-const smtpOptions = {
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+/**
+ * Generic email sender
+ */
+export const sendEmail = async ({ to, subject, html }) => {
+  try {
+    console.log(process.env.EMAIL_FROM);
+    const { data, error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM,
+      to,
+      subject,
+      html,
+    });
+
+    if (error) {
+      console.error("Resend Error:", error);
+      throw new Error("Failed to send email");
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Email send failed:", err);
+    throw err;
+  }
 };
 
-export const sendEmail = async (data) => {
-  const transporter = nodemailer.createTransport({
-    ...smtpOptions,
-  });
-
-  return await transporter.sendMail({
-    from: "Next.js Auth <krishnagokul1729@gmail.com>",
-    ...data,
-  });
-};
-
+/**
+ * Reset password email
+ */
 export const sendResetPasswordEmail = async (to, resetUrl) => {
   const subject = "Reset Your Password";
 
@@ -69,30 +78,54 @@ export const sendResetPasswordEmail = async (to, resetUrl) => {
     html,
   });
 
-  console.log("Reset password email sent");
+  console.log("✅ Reset password email sent");
 };
 
 export const sendWelcomeEmail = async (to, name) => {
   const subject = "Welcome to Our App!";
+
   const html = `
-      <div style="font-family: Arial, sans-serif; padding: 20px;">
-        <h2>Welcome, ${name}!</h2>
-        <p>We're excited to have you join us. 🎉</p>
-        <p>Here's what you can do next:</p>
-        <ul>
-          <li>Complete your profile</li>
-          <li>Explore our features</li>
-          <li>Stay tuned for updates</li>
-        </ul>
-        <p>If you have any questions, feel free to reply to this email.</p>
-        <p style="margin-top: 30px;">Cheers,<br/>The Team 🚀</p>
-      </div>
-    `;
+   <div style="font-family: Arial, Helvetica, sans-serif; padding: 24px; max-width: 600px; margin: auto; color: #111827;">
+  <h2 style="margin-bottom: 12px;">Welcome to the Liture Admin Portal</h2>
+
+  <p>Dear ${name},</p>
+
+  <p>
+    Your administrator account has been successfully created and activated.
+    You now have access to the Liture Admin Portal to manage users, content,
+    and platform operations.
+  </p>
+
+  <p>
+    Please ensure that your profile information is up to date and review
+    your assigned permissions to begin managing the system effectively.
+  </p>
+
+  <p>
+    If you encounter any issues or require assistance, please contact the
+    system administrator or reply to this email for support.
+  </p>
+
+  <p style="margin-top: 32px;">
+    Regards,<br />
+    <strong>Liture Administration Team</strong>
+  </p>
+
+  <hr style="margin: 32px 0; border: none; border-top: 1px solid #e5e7eb;" />
+
+  <p style="font-size: 12px; color: #6b7280;">
+    This is an automated system message. Please do not share your login credentials
+    with anyone. If you did not expect this email, contact support immediately.
+  </p>
+</div>
+
+  `;
 
   await sendEmail({
     to,
     subject,
     html,
   });
-  console.log("email sent");
+
+  console.log("✅ Welcome email sent");
 };
