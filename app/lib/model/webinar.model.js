@@ -2,18 +2,20 @@ import mongoose from "mongoose";
 
 const webinarSchema = new mongoose.Schema(
   {
-    image: String,
+    image: {
+      type: String,
+      default: null,
+    },
     title: String,
     description: String,
-    eventDate: Date,
+    event_date: Date,
 
-    status: {
-      type: String,
-      enum: ["active", "inactive"],
-      default: "active",
+    is_active: {
+      type: Boolean,
+      default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export default mongoose.models?.webinars ||

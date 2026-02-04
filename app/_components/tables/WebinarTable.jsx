@@ -29,7 +29,7 @@ export default function WebinarTable({ data, pagination }) {
       <DeleteModal
         ref={deleteModalRef}
         onDelete={async () => {
-          await deleteWebinarAction(selectedRow?._id);
+          await deleteWebinarAction(selectedRow?.id);
         }}
       />
 
@@ -39,6 +39,8 @@ export default function WebinarTable({ data, pagination }) {
             accessorKey: "image",
             header: "Image",
             customRender: (value) => {
+              if (!value)
+                return <span className="text-muted-foreground">No image</span>;
               return (
                 <Image
                   src={value}
@@ -51,40 +53,31 @@ export default function WebinarTable({ data, pagination }) {
             },
           },
           { accessorKey: "title", header: "Title" },
-          { accessorKey: "eventDate", header: "Event Date" },
+          { accessorKey: "event_date", header: "Event Date" },
           {
-            accessorKey: "status",
+            accessorKey: "is_active",
             header: "Status",
             customRender: (value) => {
-              const statusClasses = {
-                completed: "bg-blue-200 text-blue-800",
-                active: "bg-green-200 text-green-800",
-                inactive: "bg-red-200 text-red-800",
-              };
+              const isActive = value === true || value === "true";
+              const statusClasses = isActive
+                ? "bg-green-200 text-green-800"
+                : "bg-red-200 text-red-800";
 
-              const indicatorClasses = {
-                completed: "bg-blue-500",
-                active: "bg-green-500",
-                inactive: "bg-red-500",
-              };
+              const indicatorClasses = isActive ? "bg-green-500" : "bg-red-500";
 
               return (
                 <span
-                  className={`px-2 py-1 flex items-center gap-2 w-fit rounded-md ${
-                    statusClasses[value] || "bg-gray-200 text-gray-800"
-                  }`}
+                  className={`px-2 py-1 flex items-center gap-2 w-fit rounded-md ${statusClasses}`}
                 >
                   <span
-                    className={`w-2 h-2 rounded-full ${
-                      indicatorClasses[value] || "bg-gray-500"
-                    }`}
+                    className={`w-2 h-2 rounded-full ${indicatorClasses}`}
                   ></span>
-                  {value}
+                  {isActive ? "Active" : "Inactive"}
                 </span>
               );
             },
           },
-          { accessorKey: "createdAt", header: "Created" },
+          { accessorKey: "created_at", header: "Created" },
         ]}
         data={data}
         pagination={pagination}
@@ -92,13 +85,13 @@ export default function WebinarTable({ data, pagination }) {
           {
             label: "View",
             action: () => {
-              router.push(`webinars/${row?._id}`);
+              router.push(`webinars/${row?.id}`);
             },
           },
           {
             label: "Edit",
             action: () => {
-              router.push(`webinars/${row?._id}?mode=edit`);
+              router.push(`webinars/${row?.id}?mode=edit`);
             },
           },
           {

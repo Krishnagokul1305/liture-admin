@@ -1,6 +1,6 @@
-import dbConnect from "@/app/lib/db";
-import webinarModel from "@/app/lib/model/webinar.model";
-import { formatDateTime } from "@/app/utils/helper";
+import { auth } from "@/app/lib/auth";
+
+const API_BASE_URL = process.env.DJANGO_API_URL;
 
 /* ============================
    GET ALL WEBINARS
@@ -8,152 +8,123 @@ import { formatDateTime } from "@/app/utils/helper";
 export async function getAllWebinars({
   search,
   status,
-  time, // "past" | "upcoming"
+  time,
   page = 1,
-  limit = 10,
+  page_size = 10,
 } = {}) {
-  await dbConnect();
+  const session = await auth();
+  const params = new URLSearchParams();
 
-  const query = {};
-  const now = new Date();
+  if (search) params.append("search", search);
+  if (status) params.append("status", status);
+  if (time) params.append("time", time);
+  if (page) params.append("page", page);
+  if (page_size) params.append("page_size", page_size);
 
-  if (status) {
-    query.status = status;
-  }
+  const res = await fetch(`${API_BASE_URL}/webinars/?${params.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
 
-  // 🔍 Search
-  if (search) {
-    query.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { description: { $regex: search, $options: "i" } },
-    ];
-  }
-
-  // ⏱ Time-based filtering
-  if (time === "upcoming") {
-    query.eventDate = { $gte: now };
-  }
-
-  if (time === "past") {
-    query.eventDate = { $lt: now };
-  }
-
-  const skip = (page - 1) * limit;
-
-  // 📌 Sorting logic
-  const sort =
-    time === "upcoming"
-      ? { eventDate: 1 } // nearest upcoming first
-      : time === "past"
-      ? { eventDate: -1 } // latest past first
-      : { createdAt: -1 }; // default
-
-  const webinars = await webinarModel
-    .find(query)
-    .skip(skip)
-    .limit(limit)
-    .sort(sort)
-    .lean();
-
-  const total = await webinarModel.countDocuments(query);
+  const data = await res.json();
+  const webinars = data?.results || [];
+  const count = data?.count || 0;
 
   return {
-    webinars: webinars.map((webinar) => ({
-      ...webinar,
-      _id: webinar._id.toString(),
-      eventDate: formatDateTime(webinar.eventDate)?.date,
-      createdAt: formatDateTime(webinar.createdAt)?.date,
-    })),
+    webinars,
     pagination: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      total: count,
+      page: parseInt(page),
+      page_size: parseInt(page_size),
+      totalPages: Math.ceil(count / page_size),
     },
   };
 }
 
 export async function getAllWebinarsMinimal() {
-  await dbConnect();
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/webinars/minimal/`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
 
-  const webinars = await webinarModel
-    .find({}, { _id: 1, title: 1 })
-    .lean()
-    .exec();
-
-  return webinars.map((w) => ({
-    value: w._id.toString(),
-    label: w.title,
-  }));
+  const data = await res.json();
+  return data?.results || [];
 }
 
 /* ============================
    CREATE WEBINAR
 ============================ */
 export async function createWebinar(data) {
-  await dbConnect();
-
-  const webinar = await webinarModel.create({
-    image: data.image,
-    title: data.title,
-    description: data.description,
-    eventDate: data.eventDate,
-    status: data.status || "upcoming",
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/webinars/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
   });
+  const response = await res.json();
 
-  return webinar;
+  if (!res.ok) {
+    throw response;
+  }
+
+  return response;
 }
 
 export async function getWebinarById(id) {
-  await dbConnect();
-
-  const webinar = await webinarModel.findById(id).lean();
-  if (!webinar) throw new Error("Webinar not found");
-
-  return {
-    ...webinar,
-    _id: webinar._id.toString(),
-    eventDate: formatDateTime(webinar.eventDate)?.date,
-    createdAt: formatDateTime(webinar.createdAt)?.date,
-  };
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/webinars/${id}/`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await res.json();
+  return data;
 }
 
 export async function updateWebinar(id, data) {
-  await dbConnect();
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/webinars/${id}/`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  const response = await res.json();
 
-  const allowedFields = [
-    "image",
-    "title",
-    "description",
-    "eventDate",
-    "status",
-  ];
-
-  const filteredData = {};
-  for (const key of allowedFields) {
-    if (data[key] !== undefined) {
-      filteredData[key] = data[key];
-    }
+  if (!res.ok) {
+    throw response;
   }
 
-  const webinar = await webinarModel.findByIdAndUpdate(id, filteredData, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!webinar) throw new Error("Webinar not found");
-
-  return webinar;
+  return response;
 }
 
 /* ============================
    DELETE WEBINAR
 ============================ */
 export async function deleteWebinar(id) {
-  await dbConnect();
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/webinars/${id}/`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+    },
+  });
 
-  const webinar = await webinarModel.findByIdAndDelete(id);
-  if (!webinar) throw new Error("Webinar not found");
+  if (!res.ok) {
+    const response = await res.json();
+    throw response;
+  }
 
-  return true;
+  return res.ok;
 }

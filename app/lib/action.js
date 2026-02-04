@@ -6,12 +6,7 @@ import { sendResetPasswordEmail, sendWelcomeEmail } from "./email";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 
-import {
-  createUser,
-  deleteUser,
-  hasCurrentUserRole,
-  updateUser,
-} from "../../service/userService";
+import { createUser, deleteUser, updateUser } from "../../service/userService";
 import { revalidatePath } from "next/cache";
 import userModel from "./model/user.model";
 import {
@@ -54,23 +49,17 @@ export async function signOutAction() {
 }
 
 export async function registerUserAction(data) {
-  try {
-    await dbConnect();
-    if (!(await hasCurrentUserRole("SUPERADMIN"))) {
-      throw new Error("Unauthorized");
-    }
-    const user = await createUser(data);
-    revalidatePath("/users");
-    await sendWelcomeEmail(user.email, user.name);
-  } catch (error) {
-    throw error;
-  }
+  console.log(data);
+  const user = await createUser(data);
+  revalidatePath("/users");
+  // await sendWelcomeEmail(user.email, user.name);
+  return user;
 }
 
 export async function updateUserAction(id, data) {
-  await dbConnect();
-  await updateUser(id, data);
+  const user = await updateUser(id, data);
   revalidatePath("/users");
+  return user;
 }
 
 export async function deleteUserAction(id) {
@@ -129,21 +118,21 @@ export async function resetPasswordAction(token, newPassword) {
 }
 
 export async function createInternshipAction(formData) {
-  const imageFile = formData.get("image");
+  // const imageFile = formData.get("image");
 
-  let imageUrl =
-    "https://img.freepik.com/free-photo/courage-man-jump-through-gap-hill-business-concept-idea_1323-262.jpg";
+  // let imageUrl =
+  //   "https://img.freepik.com/free-photo/courage-man-jump-through-gap-hill-business-concept-idea_1323-262.jpg";
 
-  if (imageFile instanceof File && imageFile.size > 0) {
-    imageUrl = await uploadImageToS3(imageFile);
-  }
+  // if (imageFile instanceof File && imageFile.size > 0) {
+  //   imageUrl = await uploadImageToS3(imageFile);
+  // }
 
   const data = {
     title: formData.get("title"),
     description: formData.get("description"),
     status: formData.get("status"),
-    eventDate: new Date(formData.get("eventDate")),
-    image: imageUrl,
+    event_date: new Date(formData.get("event_date")),
+    // image: imageUrl,
   };
 
   await createInternship(data);
@@ -151,20 +140,20 @@ export async function createInternshipAction(formData) {
 }
 
 export async function updateInternshipAction(id, formData) {
-  const imageFile = formData.get("image");
+  // const imageFile = formData.get("image");
 
-  let imageUrl;
+  // let imageUrl;
 
-  if (imageFile instanceof File && imageFile.size > 0) {
-    imageUrl = await uploadImageToS3(imageFile);
-  }
+  // if (imageFile instanceof File && imageFile.size > 0) {
+  //   imageUrl = await uploadImageToS3(imageFile);
+  // }
 
   const data = {
     title: formData.get("title"),
     description: formData.get("description"),
     status: formData.get("status"),
-    eventDate: new Date(formData.get("eventDate")),
-    ...(imageUrl && { image: imageUrl }),
+    event_date: new Date(formData.get("event_date")),
+    // ...(imageUrl && { image: imageUrl }),
   };
 
   await updateInternship(id, data);
@@ -179,7 +168,7 @@ export async function deleteInternshipAction(id) {
 export async function createWebinarAction(formData) {
   const imageFile = formData.get("image");
 
-  let imageUrl = "https://placehold.co/600x400";
+  let imageUrl = null;
 
   if (imageFile instanceof File && imageFile.size > 0) {
     imageUrl = await uploadImageToS3(imageFile);
@@ -188,8 +177,8 @@ export async function createWebinarAction(formData) {
   const payload = {
     title: formData.get("title"),
     description: formData.get("description"),
-    eventDate: new Date(formData.get("eventDate")),
-    status: formData.get("status"),
+    event_date: new Date(formData.get("event_date")),
+    is_active: formData.get("is_active") === "true",
     image: imageUrl,
   };
 
@@ -209,8 +198,8 @@ export async function updateWebinarAction(id, formData) {
   const payload = {
     title: formData.get("title"),
     description: formData.get("description"),
-    eventDate: new Date(formData.get("eventDate")),
-    status: formData.get("status"),
+    event_date: new Date(formData.get("event_date")),
+    is_active: formData.get("is_active") === "true",
     ...(imageUrl && { image: imageUrl }),
   };
 

@@ -1,83 +1,17 @@
 import { EmptyState } from "@/app/_components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { hasCurrentUserRole } from "@/service/userService";
+import { getCurrentUserStatus } from "@/service/userService";
 import Modal from "@/app/_components/Modal";
 import MembersCard from "@/app/_components/MembersCard";
 import MembershipForm from "@/app/_components/forms/MemberShipForm";
 import { getAllMemberships } from "@/service/membershipService";
 
 async function page({ searchParams }) {
-  if (!(await hasCurrentUserRole("SUPERADMIN", "ADMIN"))) {
+  const { isAdmin, isStaff } = await getCurrentUserStatus();
+  if (!isAdmin && !isStaff) {
     throw new Error("Unauthorized");
   }
-  const MOCK_MEMBERSHIPS = [
-    {
-      id: "1",
-      name: "Starter",
-      description: "Perfect for individuals just getting started",
-      price: 29,
-      durationInDays: 30,
-      benefits: [
-        "5 GB Storage",
-        "Basic Support",
-        "Email Notifications",
-        "Advanced Analytics",
-      ],
-      isActive: true,
-    },
-    {
-      id: "2",
-      name: "Professional",
-      description: "For growing teams and power users",
-      price: 79,
-      durationInDays: 30,
-      benefits: [
-        "100 GB Storage",
-        "Priority Support",
-        "5 Team Members",
-        "Advanced Analytics",
-      ],
-      isActive: true,
-    },
-    {
-      id: "3",
-      name: "Enterprise",
-      description: "Custom solution for large organizations",
-      price: 299,
-      durationInDays: 90,
-      benefits: [
-        "Unlimited Storage",
-        "24/7 Support",
-        "Unlimited Users",
-        "Custom Integration",
-      ],
-      isActive: true,
-    },
-    {
-      id: "4",
-      name: "Premium Plus",
-      description: "Enhanced features for serious users",
-      price: 149,
-      durationInDays: 30,
-      benefits: [
-        "500 GB Storage",
-        "Premium Support",
-        "API Access",
-        "Custom Branding",
-      ],
-      isActive: true,
-    },
-    {
-      id: "5",
-      name: "Starter Plus",
-      description: "Upgrade from starter with more features",
-      price: 49,
-      durationInDays: 30,
-      benefits: ["20 GB Storage", "Standard Support", "2 Team Members"],
-      isActive: true,
-    },
-  ];
 
   const data = await getAllMemberships();
 

@@ -3,12 +3,13 @@ import TableFilter from "@/components/table/TableFilter";
 import TableSearch from "@/components/table/TableSearch";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { hasCurrentUserRole } from "@/service/userService";
+import { getCurrentUserStatus } from "@/service/userService";
 import WebinarTable from "@/app/_components/tables/WebinarTable";
 import { getAllWebinars } from "@/service/webinarService";
 
 async function page({ searchParams }) {
-  if (!(await hasCurrentUserRole("SUPERADMIN", "ADMIN"))) {
+  const { isAdmin, isStaff } = await getCurrentUserStatus();
+  if (!isAdmin && !isStaff) {
     throw new Error("Unauthorized");
   }
   const params = await searchParams;

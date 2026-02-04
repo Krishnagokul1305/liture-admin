@@ -1,157 +1,129 @@
-import dbConnect from "@/app/lib/db";
-import internshipModel from "@/app/lib/model/internship.model";
-import { formatDateTime } from "@/app/utils/helper";
+import { auth } from "@/app/lib/auth";
+
+const API_BASE_URL = process.env.DJANGO_API_URL;
 
 export async function getAllInternships({
   search,
   status,
-  time, // "past" | "upcoming"
+  time,
   page = 1,
   limit = 10,
 } = {}) {
-  await dbConnect();
+  const session = await auth();
+  const params = new URLSearchParams();
 
-  const query = {};
-  const now = new Date();
+  if (search) params.append("search", search);
+  if (status) params.append("status", status);
+  if (time) params.append("time", time);
+  if (page) params.append("page", page);
+  if (limit) params.append("limit", limit);
 
-  if (status) {
-    query.status = status;
-  }
+  const res = await fetch(`${API_BASE_URL}/internships/?${params.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
 
-  if (search) {
-    query.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { description: { $regex: search, $options: "i" } },
-    ];
-  }
-
-  // ⏱ Time-based filtering
-  if (time === "upcoming") {
-    query.eventDate = { $gte: now };
-  }
-
-  if (time === "past") {
-    query.eventDate = { $lt: now };
-  }
-
-  const skip = (page - 1) * limit;
-
-  // 📌 Default sorting:
-  // upcoming → nearest first
-  // past → latest past first
-  const sort =
-    time === "upcoming"
-      ? { eventDate: 1 }
-      : time === "past"
-      ? { eventDate: -1 }
-      : { createdAt: -1 };
-
-  const internships = await internshipModel
-    .find(query)
-    .skip(skip)
-    .limit(limit)
-    .sort(sort)
-    .lean();
-
-  const total = await internshipModel.countDocuments(query);
+  const data = await res.json();
+  const internships = data?.results || [];
 
   return {
-    internships: internships.map((internship) => ({
-      ...internship,
-      _id: internship._id.toString(),
-      eventDate: formatDateTime(internship.eventDate)?.date,
-      createdAt: formatDateTime(internship.createdAt)?.date,
-    })),
+    internships,
     pagination: {
-      total,
+      total: data?.count || internships.length,
       page,
       limit,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil((data?.count || 0) / limit),
     },
   };
 }
 
 export async function getAllInternshipsOptions() {
-  await dbConnect();
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/internships/options/`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
 
-  const internships = await internshipModel
-    .find({}, { _id: 1, title: 1 })
-    .lean();
-
-  return internships.map(({ _id, title }) => ({
-    label: title,
-    value: _id.toString(),
-  }));
+  const data = await res.json();
+  return data?.results || [];
 }
 
 /* ============================
    CREATE INTERNSHIP
 ============================ */
 export async function createInternship(data) {
-  await dbConnect();
-
-  await internshipModel.create({
-    image: data.image,
-    title: data.title,
-    description: data.description,
-    eventDate: data.eventDate,
-    status: data.status || "active",
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/internships/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
   });
+  const response = await res.json();
+  console.log(response);
+  if (!res.ok) {
+    throw response;
+  }
+
+  return response;
 }
 
 /* ============================
    GET INTERNSHIP BY ID
 ============================ */
 export async function getInternshipById(id) {
-  await dbConnect();
-
-  const internship = await internshipModel.findById(id).lean();
-  if (!internship) throw new Error("Internship not found");
-
-  return {
-    ...internship,
-    _id: internship._id.toString(),
-    eventDate: formatDateTime(internship.eventDate)?.date,
-    createdAt: formatDateTime(internship.createdAt)?.date,
-  };
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/internships/${id}/`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await res.json();
+  return data;
 }
 
 /* ============================
    UPDATE INTERNSHIP
 ============================ */
 export async function updateInternship(id, data) {
-  await dbConnect();
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/internships/${id}/`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  const response = await res.json();
 
-  const allowedFields = [
-    "image",
-    "title",
-    "description",
-    "eventDate",
-    "status",
-  ];
-
-  const filteredData = {};
-  for (const key of allowedFields) {
-    if (data[key] !== undefined) {
-      filteredData[key] = data[key];
-    }
+  if (!res.ok) {
+    throw response;
   }
 
-  const internship = await internshipModel.findByIdAndUpdate(id, filteredData, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!internship) throw new Error("Internship not found");
-
-  return internship;
+  return response;
 }
 
 export async function deleteInternship(id) {
-  await dbConnect();
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/internships/${id}/`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+    },
+  });
 
-  const internship = await internshipModel.findByIdAndDelete(id);
-  if (!internship) throw new Error("Internship not found");
+  if (!res.ok) {
+    const response = await res.json();
+    throw response;
+  }
 
-  return true;
+  return res.ok;
 }

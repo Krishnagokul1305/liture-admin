@@ -8,7 +8,7 @@ import DeleteModal from "./DeleteModal";
 import { deleteInternshipAction, deleteMembershipAction } from "../lib/action";
 
 export default function MembersCard({ membership }) {
-  const isInactive = !membership.isActive;
+  const isInactive = !membership.is_active;
 
   return (
     <div
@@ -52,7 +52,7 @@ export default function MembersCard({ membership }) {
             <MembershipForm initialData={membership} mode="edit" />
           </Modal>
           <DeleteModal
-            onDelete={async () => await deleteMembershipAction(membership?._id)}
+            onDelete={async () => await deleteMembershipAction(membership?.id)}
             trigger={
               <Button className="flex-1 border-border w-full">Delete</Button>
             }

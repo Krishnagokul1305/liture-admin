@@ -29,7 +29,7 @@ export default function InternshipTable({ data, pagination }) {
       <DeleteModal
         ref={deleteModalRef}
         onDelete={async () => {
-          await deleteInternshipAction(selectedRow?._id);
+          await deleteInternshipAction(selectedRow?.id);
         }}
       />
 
@@ -39,7 +39,7 @@ export default function InternshipTable({ data, pagination }) {
             accessorKey: "image",
             header: "Image",
             customRender: (value) => {
-              return (
+              return value ? (
                 <Image
                   src={value}
                   height={70}
@@ -47,44 +47,57 @@ export default function InternshipTable({ data, pagination }) {
                   unoptimized
                   alt="Internship image"
                 />
+              ) : (
+                <span className="text-muted-foreground">No image</span>
               );
             },
           },
           { accessorKey: "title", header: "Title" },
-          { accessorKey: "eventDate", header: "EventDate" },
           {
-            accessorKey: "status",
+            accessorKey: "description",
+            header: "Description",
+            customRender: (value) => {
+              return value?.length > 50
+                ? `${value.substring(0, 50)}...`
+                : value;
+            },
+          },
+          {
+            accessorKey: "event_date",
+            header: "Event Date",
+            customRender: (value) => {
+              return value ? new Date(value).toLocaleString() : "-";
+            },
+          },
+          {
+            accessorKey: "is_active",
             header: "Status",
             customRender: (value) => {
-              const statusClasses = {
-                completed: "bg-blue-200 text-blue-800",
-                active: "bg-green-200 text-green-800",
-                inactive: "bg-red-200 text-red-800",
-              };
-
-              const indicatorClasses = {
-                completed: "bg-blue-500",
-                active: "bg-green-500",
-                inactive: "bg-red-500",
-              };
+              const isActive = value;
+              const statusClasses = isActive
+                ? "bg-green-200 text-green-800"
+                : "bg-red-200 text-red-800";
+              const indicatorClasses = isActive ? "bg-green-500" : "bg-red-500";
 
               return (
                 <span
-                  className={`px-2 py-1 flex items-center gap-2 w-fit rounded-md ${
-                    statusClasses[value] || "bg-gray-200 text-gray-800"
-                  }`}
+                  className={`px-2 py-1 flex items-center gap-2 w-fit rounded-md ${statusClasses}`}
                 >
                   <span
-                    className={`w-2 h-2 rounded-full ${
-                      indicatorClasses[value] || "bg-gray-500"
-                    }`}
+                    className={`w-2 h-2 rounded-full ${indicatorClasses}`}
                   ></span>
-                  {value}
+                  {isActive ? "Active" : "Inactive"}
                 </span>
               );
             },
           },
-          { accessorKey: "createdAt", header: "Created" },
+          {
+            accessorKey: "created_at",
+            header: "Created",
+            customRender: (value) => {
+              return value ? new Date(value).toLocaleString() : "-";
+            },
+          },
         ]}
         data={data}
         pagination={pagination}
@@ -92,13 +105,13 @@ export default function InternshipTable({ data, pagination }) {
           {
             label: "View",
             action: () => {
-              router.push(`internships/${row?._id}`);
+              router.push(`internships/${row?.id}`);
             },
           },
           {
             label: "Edit",
             action: () => {
-              router.push(`internships/${row?._id}?mode=edit`);
+              router.push(`internships/${row?.id}?mode=edit`);
             },
           },
           {

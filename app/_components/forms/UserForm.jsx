@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -41,7 +42,9 @@ const getFormSchema = (isCreate) =>
     password: isCreate
       ? z.string().min(6, "Password must be at least 6 characters")
       : z.string().optional(),
-    role: z.enum(["USER", "ADMIN", "SUPERADMIN"]),
+    phone_number: z.string().optional(),
+    role: z.enum(["NORMAL", "STAFF", "ADMIN"]),
+    is_active: z.boolean().default(true),
   });
 
 export default function UserForm({
@@ -60,7 +63,13 @@ export default function UserForm({
       name: initialData?.name || "",
       email: initialData?.email || "",
       password: "",
-      role: initialData?.role || "USER",
+      phone_number: initialData?.phone_number || "",
+      role: initialData?.is_superuser
+        ? "ADMIN"
+        : initialData?.is_staff
+          ? "STAFF"
+          : "NORMAL",
+      is_active: initialData?.is_active ?? true,
     },
   });
   const queryClient = useQueryClient();
@@ -68,26 +77,51 @@ export default function UserForm({
     setLoading(true);
     console.log(data);
     try {
+      const roleFlags = {
+        is_staff: data.role === "STAFF" || data.role === "ADMIN",
+        is_superuser: data.role === "ADMIN",
+      };
+
+      const payload = {
+        name: data.name,
+        email: data.email,
+        phone_number: data.phone_number || null,
+        is_active: data.is_active,
+        ...roleFlags,
+        ...(isCreate ? { password: data.password } : {}),
+      };
+
       if (isCreate) {
-        toast.promise(registerUserAction(data), {
-          loading: "Creating user...",
-          success: "User created successfully!",
-          error: "Error creating user",
-        });
+        await registerUserAction(payload);
       } else {
-        toast.promise(updateUserAction(initialData._id, data), {
-          loading: "Updating user...",
-          success: "User updated successfully!",
-          error: "Error updating user",
-        });
+        await updateUserAction(initialData?.id, payload);
       }
+
+      toast.success(
+        isCreate ? "User created successfully!" : "User updated successfully!",
+      );
 
       if (!isCurrentUser)
         queryClient.invalidateQueries({ queryKey: ["current-user"] });
 
       close();
     } catch (error) {
-      console.error("User form error:", error);
+      console.log("User form error:", error);
+
+      if (error.errors) {
+        Object.keys(error.errors).forEach((field) => {
+          const messages = error.errors[field];
+          const message = Array.isArray(messages) ? messages[0] : messages;
+
+          if (field === "detail") {
+            toast.error(message);
+          } else {
+            form.setError(field, { type: "manual", message });
+          }
+        });
+      } else {
+        toast.error(error?.detail || "An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -126,6 +160,20 @@ export default function UserForm({
                   {...field}
                   disabled={!isCreate}
                 />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="phone_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone</FormLabel>
+              <FormControl>
+                <Input type="tel" placeholder="Enter phone number" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -183,9 +231,9 @@ export default function UserForm({
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent className={"w-full"}>
-                      <SelectItem value="USER">User</SelectItem>
+                      <SelectItem value="NORMAL">Normal User</SelectItem>
+                      <SelectItem value="STAFF">Staff</SelectItem>
                       <SelectItem value="ADMIN">Admin</SelectItem>
-                      <SelectItem value="SUPERADMIN">Super Admin</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -194,6 +242,28 @@ export default function UserForm({
             )}
           />
         )}
+
+        <FormField
+          control={form.control}
+          name="is_active"
+          render={({ field }) => (
+            <FormItem className="flex items-center justify-between rounded-md border p-3">
+              <div>
+                <FormLabel>Active</FormLabel>
+                <p className="text-sm text-muted-foreground">
+                  Disable to block user access
+                </p>
+              </div>
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={(value) => field.onChange(!!value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         {/* Actions */}
         <div className="flex items-center justify-end gap-3">
           <Button

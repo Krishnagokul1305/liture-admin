@@ -33,7 +33,7 @@ const membershipSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   benefits: z.array(z.string().min(1, "Benefit cannot be empty")),
-  isActive: z.boolean(),
+  is_active: z.boolean(),
 });
 
 export default function MembershipForm({
@@ -47,7 +47,7 @@ export default function MembershipForm({
       name: initialData?.name || "",
       description: initialData?.description || "",
       benefits: initialData?.benefits?.length ? initialData.benefits : [""],
-      isActive: initialData?.isActive ?? true,
+      is_active: initialData?.is_active ?? true,
     },
   });
 
@@ -65,7 +65,7 @@ export default function MembershipForm({
           error: "Error Updating Internship",
         });
       } else {
-        toast.promise(updateMembershipAction(initialData._id, data), {
+        toast.promise(updateMembershipAction(initialData.id, data), {
           loading: "Updating Internship...",
           success: "Updated Internship successfully!",
           error: "Error Updating Internship",
@@ -166,7 +166,7 @@ export default function MembershipForm({
 
         <FormField
           control={form.control}
-          name="isActive"
+          name="is_active"
           render={({ field }) => (
             <FormItem className="max-w-xs">
               <FormLabel>Status</FormLabel>

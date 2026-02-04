@@ -1,86 +1,147 @@
-import dbConnect from "@/app/lib/db";
-import membershipModel from "@/app/lib/model/membership.model";
-import { formatDateTime } from "@/app/utils/helper";
+import { auth } from "@/app/lib/auth";
+
+const API_BASE_URL = process.env.DJANGO_API_URL;
 
 export async function createMembership(data) {
-  await dbConnect();
-  return await membershipModel.create(data);
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/memberships/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  const response = await res.json();
+
+  if (!res.ok) {
+    throw response;
+  }
+
+  return response;
 }
 
 /**
  * READ ALL
  */
 export async function getAllMemberships(filter = {}) {
-  await dbConnect();
+  const session = await auth();
+  const params = new URLSearchParams(filter);
 
-  const memberships = await membershipModel
-    .find(filter)
-    .sort({ createdAt: -1 })
-    .lean();
+  const res = await fetch(`${API_BASE_URL}/memberships/?${params.toString()}`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
 
-  return memberships.map((membership) => ({
-    ...membership,
-    _id: membership._id.toString(),
-    createdAt: formatDateTime(membership.createdAt).date,
-  }));
+  const data = await res.json();
+  return data?.results || [];
 }
 
 export async function getAllMembershipsOptions() {
-  await dbConnect();
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/memberships/options/`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
 
-  const memberships = await membershipModel
-    .find({}, { _id: 1, name: 1 })
-    .lean();
-
-  return memberships.map(({ _id, name }) => ({
-    label: name,
-    value: _id.toString(),
-  }));
+  const data = await res.json();
+  return data?.results || [];
 }
 
 /**
  * READ ONE
  */
 export async function getMembershipById(id) {
-  await dbConnect();
-  return await membershipModel.findById(id);
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/memberships/${id}/`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await res.json();
+  return data;
 }
 
 /**
  * READ BY NAME (optional helper)
  */
 export async function getMembershipByName(name) {
-  await dbConnect();
-  return await membershipModel.findOne({ name });
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/memberships/?name=${name}`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+  const data = await res.json();
+  return data?.results?.[0] || null;
 }
 
 /**
  * UPDATE
  */
 export async function updateMembership(id, data) {
-  await dbConnect();
-  return await membershipModel.findByIdAndUpdate(id, data, {
-    new: true,
-    runValidators: true,
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/memberships/${id}/`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
   });
+  const response = await res.json();
+
+  if (!res.ok) {
+    throw response;
+  }
+
+  return response;
 }
 
 /**
  * DELETE (hard delete)
  */
 export async function deleteMembership(id) {
-  await dbConnect();
-  return await membershipModel.findByIdAndDelete(id);
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/memberships/${id}/`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    const response = await res.json();
+    throw response;
+  }
+
+  return res.ok;
 }
 
 /**
  * SOFT DELETE (recommended)
  */
 export async function deactivateMembership(id) {
-  await dbConnect();
-  return await membershipModel.findByIdAndUpdate(
-    id,
-    { isActive: false },
-    { new: true }
-  );
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/memberships/${id}/`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ isActive: false }),
+  });
+  const response = await res.json();
+
+  if (!res.ok) {
+    throw response;
+  }
+
+  return response;
 }

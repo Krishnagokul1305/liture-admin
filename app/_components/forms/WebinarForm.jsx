@@ -34,15 +34,11 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const webinarSchema = z.object({
-  image: z
-    .union([z.instanceof(File), z.string().url()])
-    .refine((val) => val !== null && val !== undefined, {
-      message: "Image is required",
-    }),
+  image: z.union([z.instanceof(File), z.string().url(), z.null()]).optional(),
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  eventDate: z.date({ message: "Event date is required" }),
-  status: z.enum(["active", "inactive"]),
+  event_date: z.date({ message: "Event date is required" }),
+  is_active: z.boolean(),
 });
 
 export default function WebinarForm({
@@ -59,10 +55,11 @@ export default function WebinarForm({
       image: initialData?.image || null,
       title: initialData?.title || "",
       description: initialData?.description || "",
-      eventDate: initialData?.eventDate
-        ? new Date(initialData.eventDate)
+      event_date: initialData?.event_date
+        ? new Date(initialData.event_date)
         : new Date(),
-      status: initialData?.status || "active",
+      is_active:
+        initialData?.is_active !== undefined ? initialData.is_active : true,
     },
   });
 
@@ -72,8 +69,8 @@ export default function WebinarForm({
 
       formData.append("title", data.title);
       formData.append("description", data.description);
-      formData.append("eventDate", data.eventDate.toISOString());
-      formData.append("status", data.status);
+      formData.append("event_date", data.event_date.toISOString());
+      formData.append("is_active", data.is_active.toString());
 
       if (data.image instanceof File) {
         formData.append("image", data.image); // original file
@@ -163,7 +160,7 @@ export default function WebinarForm({
         <div className="flex flex-col md:flex-row gap-4 w-full">
           <FormField
             control={form.control}
-            name="eventDate"
+            name="event_date"
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Event Date</FormLabel>
@@ -200,13 +197,13 @@ export default function WebinarForm({
 
           <FormField
             control={form.control}
-            name="status"
+            name="is_active"
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Status</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  onValueChange={(value) => field.onChange(value === "true")}
+                  defaultValue={field.value ? "true" : "false"}
                   disabled={isViewMode}
                 >
                   <FormControl>
@@ -215,8 +212,8 @@ export default function WebinarForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="true">Active</SelectItem>
+                    <SelectItem value="false">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />

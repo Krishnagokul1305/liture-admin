@@ -13,6 +13,9 @@ export default function UsersTable({ data, pagination }) {
 
   const [selectedRow, setSelectedRow] = useState(null);
 
+  const formatDate = (value) =>
+    value ? new Date(value).toLocaleString() : "-";
+
   return (
     <div className="bg-sidebar rounded-lg">
       <Modal
@@ -26,7 +29,7 @@ export default function UsersTable({ data, pagination }) {
       <DeleteModal
         ref={deleteModalRef}
         onDelete={async () => {
-          await deleteUserAction(selectedRow?._id);
+          await deleteUserAction(selectedRow?.id);
         }}
       />
 
@@ -34,8 +37,31 @@ export default function UsersTable({ data, pagination }) {
         columnCofig={[
           { accessorKey: "name", header: "Name" },
           { accessorKey: "email", header: "Email" },
-          { accessorKey: "role", header: "Role" },
-          { accessorKey: "createdAt", header: "Created" },
+          {
+            accessorKey: "phone_number",
+            header: "Phone",
+            customRender: (value) => value || "-",
+          },
+          {
+            accessorKey: "is_staff",
+            header: "Staff",
+            customRender: (value) => (value ? "Yes" : "No"),
+          },
+          {
+            accessorKey: "is_superuser",
+            header: "Admin",
+            customRender: (value) => (value ? "Yes" : "No"),
+          },
+          {
+            accessorKey: "is_active",
+            header: "Active",
+            customRender: (value) => (value ? "Yes" : "No"),
+          },
+          {
+            accessorKey: "created_at",
+            header: "Created",
+            customRender: (value) => formatDate(value),
+          },
         ]}
         data={data}
         pagination={pagination}

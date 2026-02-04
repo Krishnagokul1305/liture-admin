@@ -6,10 +6,11 @@ import TableSearch from "@/components/table/TableSearch";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import UsersTable from "../../_components/tables/UsersTable";
-import { getAllUsers, hasCurrentUserRole } from "@/service/userService";
+import { getAllUsers, getCurrentUserStatus } from "@/service/userService";
 
 async function page({ searchParams }) {
-  if (!(await hasCurrentUserRole("SUPERADMIN"))) {
+  const { isAdmin } = await getCurrentUserStatus();
+  if (!isAdmin) {
     throw new Error("Unauthorized");
   }
   const params = await searchParams;

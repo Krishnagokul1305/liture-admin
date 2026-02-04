@@ -1,120 +1,113 @@
-import dbConnect from "@/app/lib/db";
-import userModel from "../app/lib/model/user.model";
-import bcrypt from "bcryptjs";
-import { formatDateTime } from "@/app/utils/helper";
 import { auth } from "@/app/lib/auth";
 
-export async function getAllUsers({ role, search, page = 1, limit = 10 } = {}) {
-  await dbConnect();
-  const query = {};
+const API_BASE_URL = process.env.DJANGO_API_URL;
 
-  if (role) {
-    query.role = role.toUpperCase();
-  }
+export async function getAllUsers() {
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/users/`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
 
-  if (search) {
-    query.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { email: { $regex: search, $options: "i" } },
-    ];
-  }
-
-  const skip = (page - 1) * limit;
-
-  const users = await userModel
-    .find(query)
-    .skip(skip)
-    .limit(limit)
-    .sort({ createdAt: -1 })
-    .lean();
-
-  const total = await userModel.countDocuments(query);
+  const data = await res.json();
+  const users = data?.results || [];
 
   return {
-    users: users.map((user) => ({
-      ...user,
-      _id: user._id.toString(),
-      createdAt: formatDateTime(user.createdAt?.toISOString())?.date,
-      updatedAt: formatDateTime(user.updatedAt?.toISOString())?.date,
-    })),
+    users,
     pagination: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
+      total: data?.count || users.length,
+      page: 1,
+      limit: 10,
+      totalPages: Math.ceil((data?.count || 0) / 10),
     },
   };
 }
 
-export async function createUser(data) {
-  await dbConnect();
-  const { name, email, password, role = "USER" } = data;
-
-  const hashedPassword = await bcrypt.hash(password, 12);
-
-  const user = await userModel.create({
-    name,
-    email,
-    password: hashedPassword,
-    role,
+export async function getUserById(id) {
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/users/${id}/`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
   });
-
-  return user;
+  const { data } = await res.json();
+  return data;
 }
 
-export const getUserById = async (userId) => {
-  await dbConnect();
-  const user = await userModel.findById(userId);
-
-  if (!user) throw new Error("User not found");
-
-  return user;
-};
-
-export const updateUser = async (userId, data) => {
-  await dbConnect();
-  const allowedFields = ["name", "email", "role"];
-  const filteredData = {};
-
-  for (const key of allowedFields) {
-    if (data[key] !== undefined) {
-      filteredData[key] = data[key];
-    }
-  }
-
-  console.log(data);
-
-  const user = await userModel.findByIdAndUpdate(userId, filteredData, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!user) throw new Error("User not found");
-
-  return user;
-};
-
-export const deleteUser = async (userId) => {
-  await dbConnect();
-  const user = await userModel.findByIdAndDelete(userId);
-  if (!user) throw new Error("User not found");
-  return true;
-};
-
-export const getCurrentUser = async () => {
-  const user = (await auth())?.user;
-  if (!user) {
-    throw new Error("Session not found");
-  }
-  return getUserById(user?.id);
-};
-
-export async function hasCurrentUserRole(...expectedRoles) {
+export async function getCurrentUser() {
   const session = await auth();
-  if (!session?.user?.id) return false;
+  const res = await fetch(`${API_BASE_URL}/users/me/`, {
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+  const { data } = await res.json();
+  return data;
+}
 
-  const user = await getUserById(session.user.id);
-  if (!user) return false;
+export async function createUser(data) {
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/users/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  const response = await res.json();
 
-  return expectedRoles.includes(user.role);
+  if (!res.ok) {
+    throw response;
+  }
+
+  return response;
+}
+
+export async function updateUser(id, data) {
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/users/${id}/`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  const response = await res.json();
+
+  if (!res.ok) {
+    throw response;
+  }
+
+  return response;
+}
+
+export async function deleteUser(id) {
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/users/${id}/`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+    },
+  });
+  return res.ok;
+}
+
+export async function getCurrentUserStatus() {
+  try {
+    const user = await getCurrentUser();
+
+    return {
+      isStaff: !!user?.is_staff,
+      isAdmin: !!user?.is_superuser,
+      isAuthenticated: !!user?.id,
+    };
+  } catch {
+    return { isStaff: false, isAdmin: false, isAuthenticated: false };
+  }
 }

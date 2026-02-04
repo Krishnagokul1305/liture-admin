@@ -37,11 +37,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const internshipSchema = z.object({
-  image: z
-    .union([z.instanceof(File), z.string().url()])
-    .refine((val) => val !== null && val !== undefined, {
-      message: "Image is required",
-    }),
+  image: z.union([z.instanceof(File), z.string().url()]).optional(),
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   eventDate: z.date({ message: "Event date is required" }),
@@ -62,8 +58,8 @@ export default function InternshipForm({
       image: initialData?.image || null,
       title: initialData?.title || "",
       description: initialData?.description || "",
-      eventDate: initialData?.eventDate
-        ? new Date(initialData.eventDate)
+      event_date: initialData?.event_date
+        ? new Date(initialData.event_date)
         : new Date(),
       status: initialData?.status || "active",
     },
@@ -76,12 +72,12 @@ export default function InternshipForm({
       formData.append("title", data.title);
       formData.append("description", data.description);
       formData.append("status", data.status);
-      formData.append("eventDate", data.eventDate.toISOString());
+      formData.append("event_date", data.eventDate.toISOString());
 
-      if (data.image instanceof File) {
-        formData.append("image", data.image);
-      }
-
+      // if (data.image instanceof File) {
+      //   formData.append("image", data.image);
+      // }
+      console.log(data);
       if (mode === "create") {
         toast.promise(createInternshipAction(formData), {
           loading: "Creating Internship...",
@@ -98,7 +94,7 @@ export default function InternshipForm({
         });
       }
 
-      router.push("/internships");
+      // router.push("/internships");
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong");
@@ -167,7 +163,7 @@ export default function InternshipForm({
         <div className="flex flex-col md:flex-row gap-4 w-full">
           <FormField
             control={form.control}
-            name="eventDate"
+            name="event_date"
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Event Date</FormLabel>
