@@ -12,8 +12,8 @@ async function page({ searchParams }) {
   if (!isAdmin && !isStaff) {
     throw new Error("Unauthorized");
   }
-
-  const data = await getAllMemberships();
+  const param = await searchParams;
+  const data = await getAllMemberships(param);
 
   return (
     <div className="space-y-5">

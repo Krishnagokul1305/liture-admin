@@ -40,12 +40,12 @@ async function page({ searchParams }) {
             ]}
           />
           <TableFilter
-            name="status"
+            name="is_active"
             className={"w-full"}
             options={[
               { label: "All", value: "all" },
-              { label: "Active", value: "active" },
-              { label: "Inactive", value: "inactive" },
+              { label: "Active", value: "true" },
+              { label: "Inactive", value: "false" },
             ]}
           />
         </div>

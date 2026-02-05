@@ -24,7 +24,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { format, formatDate } from "date-fns";
 import ImageUploader from "@/components/ImageUploader";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -69,7 +69,7 @@ export default function WebinarForm({
 
       formData.append("title", data.title);
       formData.append("description", data.description);
-      formData.append("event_date", data.event_date.toISOString());
+      formData.append("event_date", formatDate(data.event_date, "yyyy-MM-dd"));
       formData.append("is_active", data.is_active.toString());
 
       if (data.image instanceof File) {

@@ -45,8 +45,8 @@ export async function getCurrentUser() {
       "Content-Type": "application/json",
     },
   });
-  const { data } = await res.json();
-  return data;
+  const response = await res.json();
+  return response.data;
 }
 
 export async function createUser(data) {

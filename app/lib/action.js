@@ -118,45 +118,12 @@ export async function resetPasswordAction(token, newPassword) {
 }
 
 export async function createInternshipAction(formData) {
-  // const imageFile = formData.get("image");
-
-  // let imageUrl =
-  //   "https://img.freepik.com/free-photo/courage-man-jump-through-gap-hill-business-concept-idea_1323-262.jpg";
-
-  // if (imageFile instanceof File && imageFile.size > 0) {
-  //   imageUrl = await uploadImageToS3(imageFile);
-  // }
-
-  const data = {
-    title: formData.get("title"),
-    description: formData.get("description"),
-    status: formData.get("status"),
-    event_date: new Date(formData.get("event_date")),
-    // image: imageUrl,
-  };
-
-  await createInternship(data);
+  await createInternship(formData);
   revalidatePath("/internships");
 }
 
 export async function updateInternshipAction(id, formData) {
-  // const imageFile = formData.get("image");
-
-  // let imageUrl;
-
-  // if (imageFile instanceof File && imageFile.size > 0) {
-  //   imageUrl = await uploadImageToS3(imageFile);
-  // }
-
-  const data = {
-    title: formData.get("title"),
-    description: formData.get("description"),
-    status: formData.get("status"),
-    event_date: new Date(formData.get("event_date")),
-    // ...(imageUrl && { image: imageUrl }),
-  };
-
-  await updateInternship(id, data);
+  await updateInternship(id, formData);
   revalidatePath("/internships");
 }
 
@@ -166,44 +133,12 @@ export async function deleteInternshipAction(id) {
 }
 
 export async function createWebinarAction(formData) {
-  const imageFile = formData.get("image");
-
-  let imageUrl = null;
-
-  if (imageFile instanceof File && imageFile.size > 0) {
-    imageUrl = await uploadImageToS3(imageFile);
-  }
-
-  const payload = {
-    title: formData.get("title"),
-    description: formData.get("description"),
-    event_date: new Date(formData.get("event_date")),
-    is_active: formData.get("is_active") === "true",
-    image: imageUrl,
-  };
-
-  await createWebinar(payload);
+  await createWebinar(formData);
   revalidatePath("/webinars");
 }
 
 export async function updateWebinarAction(id, formData) {
-  const imageFile = formData.get("image");
-
-  let imageUrl = undefined;
-
-  if (imageFile instanceof File && imageFile.size > 0) {
-    imageUrl = await uploadImageToS3(imageFile);
-  }
-
-  const payload = {
-    title: formData.get("title"),
-    description: formData.get("description"),
-    event_date: new Date(formData.get("event_date")),
-    is_active: formData.get("is_active") === "true",
-    ...(imageUrl && { image: imageUrl }),
-  };
-
-  await updateWebinar(id, payload);
+  await updateWebinar(id, formData);
   revalidatePath("/webinars");
 }
 

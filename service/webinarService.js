@@ -7,7 +7,7 @@ const API_BASE_URL = process.env.DJANGO_API_URL;
 ============================ */
 export async function getAllWebinars({
   search,
-  status,
+  is_active,
   time,
   page = 1,
   page_size = 10,
@@ -15,9 +15,19 @@ export async function getAllWebinars({
   const session = await auth();
   const params = new URLSearchParams();
 
-  if (search) params.append("search", search);
-  if (status) params.append("status", status);
-  if (time) params.append("time", time);
+  if (search) params.append("title", search);
+  if (is_active) params.append("is_active", is_active);
+
+  // Handle time filter with event_date_before and event_date_after
+  if (time && time !== "all") {
+    const currentDate = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+    if (time === "past") {
+      params.append("event_date_before", currentDate);
+    } else if (time === "upcoming") {
+      params.append("event_date_after", currentDate);
+    }
+  }
+
   if (page) params.append("page", page);
   if (page_size) params.append("page_size", page_size);
 
@@ -65,9 +75,8 @@ export async function createWebinar(data) {
     method: "POST",
     headers: {
       Authorization: `Bearer ${session?.accessToken}`,
-      "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    body: data,
   });
   const response = await res.json();
 
@@ -96,9 +105,8 @@ export async function updateWebinar(id, data) {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${session?.accessToken}`,
-      "Content-Type": "application/json",
     },
-    body: JSON.stringify(data),
+    body: data,
   });
   const response = await res.json();
 

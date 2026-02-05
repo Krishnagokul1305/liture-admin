@@ -24,7 +24,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { format, formatDate } from "date-fns";
 import ImageUploader from "@/components/ImageUploader";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,11 +37,11 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 const internshipSchema = z.object({
-  image: z.union([z.instanceof(File), z.string().url()]).optional(),
+  image: z.union([z.instanceof(File), z.string().url(), z.null()]).optional(),
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  eventDate: z.date({ message: "Event date is required" }),
-  status: z.enum(["active", "inactive"]),
+  event_date: z.date({ message: "Event date is required" }),
+  is_active: z.boolean(),
 });
 
 export default function InternshipForm({
@@ -61,23 +61,23 @@ export default function InternshipForm({
       event_date: initialData?.event_date
         ? new Date(initialData.event_date)
         : new Date(),
-      status: initialData?.status || "active",
+      is_active:
+        initialData?.is_active !== undefined ? initialData.is_active : true,
     },
   });
-
   const onSubmit = async (data) => {
     try {
       const formData = new FormData();
 
       formData.append("title", data.title);
       formData.append("description", data.description);
-      formData.append("status", data.status);
-      formData.append("event_date", data.eventDate.toISOString());
+      formData.append("event_date", formatDate(data.event_date, "yyyy-MM-dd"));
+      formData.append("is_active", data.is_active.toString());
 
-      // if (data.image instanceof File) {
-      //   formData.append("image", data.image);
-      // }
-      console.log(data);
+      if (data.image instanceof File) {
+        formData.append("image", data.image);
+      }
+
       if (mode === "create") {
         toast.promise(createInternshipAction(formData), {
           loading: "Creating Internship...",
@@ -94,10 +94,9 @@ export default function InternshipForm({
         });
       }
 
-      // router.push("/internships");
+      router.push("/internships");
     } catch (err) {
       console.error(err);
-      toast.error("Something went wrong");
     }
   };
 
@@ -200,13 +199,13 @@ export default function InternshipForm({
 
           <FormField
             control={form.control}
-            name="status"
+            name="is_active"
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Status</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  onValueChange={(value) => field.onChange(value === "true")}
+                  defaultValue={field.value ? "true" : "false"}
                   disabled={isViewMode}
                 >
                   <FormControl>
@@ -215,8 +214,8 @@ export default function InternshipForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="true">Active</SelectItem>
+                    <SelectItem value="false">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -226,11 +225,7 @@ export default function InternshipForm({
         </div>
 
         {!isViewMode && (
-          <Button
-            type="submit"
-            className={"d-block ms-auto"}
-            disabled={form.formState.isSubmitting}
-          >
+          <Button type="submit" className={"d-block ms-auto"}>
             {form.formState.isSubmitting ? (
               <div className="flex justify-center items-center">
                 <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin border-white dark:border-black"></div>

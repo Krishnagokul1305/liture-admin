@@ -34,7 +34,7 @@ export function NavUser() {
   const router = useRouter();
   const { isLoading, user } = useCurrentUser();
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return (
       <Button variant="ghost" size="icon" className="rounded-full">
         <Skeleton className="size-8 rounded-full" />

@@ -53,7 +53,13 @@ export default function WebinarTable({ data, pagination }) {
             },
           },
           { accessorKey: "title", header: "Title" },
-          { accessorKey: "event_date", header: "Event Date" },
+          {
+            accessorKey: "event_date",
+            header: "Event Date",
+            customRender: (value) => {
+              return value ? new Date(value).toLocaleString() : "-";
+            },
+          },
           {
             accessorKey: "is_active",
             header: "Status",
@@ -77,7 +83,13 @@ export default function WebinarTable({ data, pagination }) {
               );
             },
           },
-          { accessorKey: "created_at", header: "Created" },
+          {
+            accessorKey: "created_at",
+            header: "Created",
+            customRender: (value) => {
+              return value ? new Date(value).toLocaleString() : "-";
+            },
+          },
         ]}
         data={data}
         pagination={pagination}
