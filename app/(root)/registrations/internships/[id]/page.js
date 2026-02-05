@@ -1,6 +1,6 @@
-import MembershipRegistrationForm from "@/app/_components/forms/MembershipRegistrationForm";
-import { getMembershipRegistrationById } from "@/service/membershipService";
-import { getAllMembershipsOptions } from "@/service/membershipService";
+import RegistrationForm from "@/app/_components/forms/RegistrationForm";
+import RegistrationApproval from "@/app/_components/RegistrationApproval";
+import { getInternshipRegistrationById } from "@/service/internshipService";
 import Link from "next/link";
 
 export default async function Page({ params, searchParams }) {
@@ -9,21 +9,20 @@ export default async function Page({ params, searchParams }) {
 
   const pageConfig = {
     view: {
-      title: "View Membership Registration",
-      description: "Review membership registration details in read-only mode.",
+      title: "View Internship Registration",
+      description: "Review internship registration details in read-only mode.",
     },
   };
 
   mode = "view"; // Force view mode only
-  const current = pageConfig[mode];
 
-  const currentRegistration = await getMembershipRegistrationById(id);
-  const membershipOptions = await getAllMembershipsOptions();
+  const current = pageConfig[mode];
+  const currentRegistration = await getInternshipRegistrationById(id);
 
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
       <Link
-        href="/registrations/memberships"
+        href="/registrations/internships"
         className="inline-flex text-sm items-center text-primary font-medium mb-6 transition"
       >
         ← Back
@@ -36,12 +35,12 @@ export default async function Page({ params, searchParams }) {
         </p>
       </div>
 
-      <MembershipRegistrationForm
+      <RegistrationForm
         mode={mode}
         registrationId={id}
         initialData={currentRegistration}
-        membershipOptions={membershipOptions}
       />
+      <RegistrationApproval registrationStatus="pending" />
     </div>
   );
 }

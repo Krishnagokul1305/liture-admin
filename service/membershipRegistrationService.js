@@ -21,7 +21,6 @@ export async function getAllMembershipRegistrations({
     ];
   }
 
-  // 🎯 Filter by membership
   if (membershipId) {
     query.membership = membershipId;
   }

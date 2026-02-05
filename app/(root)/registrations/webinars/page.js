@@ -2,17 +2,17 @@ import { EmptyState } from "@/app/_components/EmptyState";
 import TableSearch from "@/components/table/TableSearch";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { hasCurrentUserRole } from "@/service/userService";
-import { getAllRegistrations } from "@/service/registrationService";
+import { getCurrentUserStatus } from "@/service/userService";
+import { getAllWebinarRegistrations } from "@/service/webinarService";
 import RegistrationTable from "@/app/_components/tables/RegistrationTable";
-import WebinarFilter from "@/app/_components/WebinarFilter";
+import StatusFilter from "@/app/_components/StatusFilter";
 async function page({ searchParams }) {
-  if (!(await hasCurrentUserRole("SUPERADMIN", "ADMIN"))) {
+  const { isAdmin, isStaff } = await getCurrentUserStatus();
+  if (!isAdmin && !isStaff) {
     throw new Error("Unauthorized");
   }
   const searchs = await searchParams;
-  const params = { ...searchs, type: "webinar" }; // set type to webinar
-  const data = await getAllRegistrations(params);
+  const data = await getAllWebinarRegistrations(searchs);
   return (
     <div className="space-y-5">
       <div className="flex md:items-center flex-col lg:flex-row justify-between mb-6">
@@ -35,7 +35,7 @@ async function page({ searchParams }) {
       <div className="flex flex-col md:flex-row rounded-md gap-4 items-center justify-between">
         <TableSearch />
         <div className="w-full md:w-fit flex gap-4 items-center">
-          <WebinarFilter />
+          <StatusFilter />
         </div>
       </div>
 

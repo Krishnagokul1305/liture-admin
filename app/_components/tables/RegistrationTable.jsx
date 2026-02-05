@@ -10,38 +10,65 @@ export default function RegistrationTable({ data, pagination, type }) {
   const router = useRouter();
   const [selectedRow, setSelectedRow] = useState(null);
 
+  // Determine column configuration based on registration type
+  const getColumnConfig = () => {
+    const baseColumns = [
+      { accessorKey: "user_email", header: "Email" },
+      { accessorKey: "title", header: "Title" },
+      { accessorKey: "status", header: "Status" },
+      {
+        accessorKey: "attended",
+        header: "Attended",
+        cell: (row) => (row.getValue() ? "Yes" : "No"),
+      },
+      { accessorKey: "reason", header: "Reason" },
+      { accessorKey: "registered_at", header: "Registered On" },
+    ];
+
+    // Add resume column for internships
+    if (type === "internships") {
+      baseColumns.splice(5, 0, {
+        accessorKey: "resume",
+        header: "Resume",
+        cell: (row) => {
+          const resume = row.getValue();
+          return resume ? (
+            <a
+              href={resume}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline"
+            >
+              View Resume
+            </a>
+          ) : (
+            "N/A"
+          );
+        },
+      });
+    }
+
+    return baseColumns;
+  };
+
   return (
     <div className="bg-sidebar rounded-lg">
       <DeleteModal
         ref={deleteModalRef}
         onDelete={async () => {
-          await deleteRegistrationAction(selectedRow?._id, type);
+          await deleteRegistrationAction(selectedRow?.id, type);
         }}
       />
 
       <DataTable
-        columnCofig={[
-          { accessorKey: "fullName", header: "Full Name" },
-          { accessorKey: "email", header: "Email" },
-          { accessorKey: "phoneNumber", header: "Phone Number" },
-          { accessorKey: "reason", header: "Reason" },
-          { accessorKey: "type", header: "Type" },
-          { accessorKey: "title", header: "Internship / Webinar" },
-          { accessorKey: "createdAt", header: "Registered On" },
-        ]}
+        columnCofig={getColumnConfig()}
         data={data}
         pagination={pagination}
         actionItems={(row) => [
           {
             label: "view",
             action: () => {
-              router.push(`/registrations/${row?._id}?mode=view`);
-            },
-          },
-          {
-            label: "Edit",
-            action: () => {
-              router.push(`/registrations/${row?._id}?mode=edit`);
+              router.push(`/registrations/${type}/${row?.id}`);
             },
           },
           {

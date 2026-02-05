@@ -20,107 +20,6 @@ export async function createRegistration(data) {
   return registrationModel.create(createData);
 }
 
-export async function getAllRegistrations({
-  search,
-  type,
-  internshipId,
-  webinarId,
-  page = 1,
-  limit = 10,
-} = {}) {
-  await dbConnect();
-
-  const query = {};
-
-  if (search) {
-    query.$or = [
-      { fullName: { $regex: search, $options: "i" } },
-      { email: { $regex: search, $options: "i" } },
-    ];
-  }
-
-  // 🎯 Filter by type
-  if (type) {
-    query.type = type;
-  }
-
-  // 🔗 Filter by internship or webinar
-  if (internshipId) query.internship = internshipId;
-  if (webinarId) query.webinar = webinarId;
-
-  const skip = (page - 1) * limit;
-
-  const registrations = await registrationModel
-    .find(query)
-    .populate("internship", "title")
-    .populate("webinar", "title")
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean();
-
-  return {
-    registrations: registrations.map((reg) => {
-      let title = null;
-      if (reg.type === "internship" && reg.internship) {
-        title = reg.internship.title;
-      }
-      if (reg.type === "webinar" && reg.webinar) {
-        title = reg.webinar.title;
-      }
-
-      return {
-        _id: reg._id.toString(),
-        fullName: reg.fullName,
-        email: reg.email,
-        phoneNumber: reg.phoneNumber,
-        reason: reg.reason,
-        type: reg.type,
-        title,
-        createdAt: formatDateTime(reg.createdAt)?.date,
-      };
-    }),
-    pagination: {
-      total: await registrationModel.countDocuments(query),
-      page,
-      limit,
-      totalPages: Math.ceil(
-        (await registrationModel.countDocuments(query)) / limit
-      ),
-    },
-  };
-}
-
-export async function getRegistrationById(id) {
-  await dbConnect();
-
-  const registration = await registrationModel
-    .findById(id)
-    .populate("internship", "title")
-    .populate("webinar", "title")
-    .lean();
-
-  if (!registration) throw new Error("Registration not found");
-  console.log(registration);
-  return {
-    ...registration,
-    _id: registration._id.toString(),
-    internship: registration.internship
-      ? {
-          ...registration.internship,
-          _id: registration.internship._id.toString(),
-        }
-      : null,
-    webinar: registration.webinar
-      ? {
-          ...registration.webinar,
-          _id: registration.webinar._id.toString(),
-        }
-      : null,
-    createdAt: formatDateTime(registration.createdAt)?.date,
-  };
-}
-
 export async function updateRegistration(id, data) {
   await dbConnect();
 
@@ -169,8 +68,8 @@ export async function getPastRegistrationStats() {
       23,
       59,
       59,
-      999
-    )
+      999,
+    ),
   );
 
   const startUTC = new Date(
@@ -181,8 +80,8 @@ export async function getPastRegistrationStats() {
       0,
       0,
       0,
-      0
-    )
+      0,
+    ),
   );
 
   const results = await registrationModel.aggregate([
@@ -246,8 +145,8 @@ export async function getPastRegistrationStats() {
       Date.UTC(
         today.getUTCFullYear(),
         today.getUTCMonth(),
-        today.getUTCDate() - i
-      )
+        today.getUTCDate() - i,
+      ),
     );
     const dateStr = d.toISOString().slice(0, 10);
 
@@ -283,8 +182,8 @@ export async function getRecentRegistrations(limit = 5) {
     type: reg.type,
     title:
       reg.type === "internship"
-        ? reg.internship?.title ?? null
-        : reg.webinar?.title ?? null,
+        ? (reg.internship?.title ?? null)
+        : (reg.webinar?.title ?? null),
     createdAt: formatDateTime(reg.createdAt)?.date,
   }));
 }

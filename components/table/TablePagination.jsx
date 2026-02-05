@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
 
 const DEFAULT_PAGE_SIZE = 10;
 

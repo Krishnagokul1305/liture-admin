@@ -1,20 +1,19 @@
 import { EmptyState } from "@/app/_components/EmptyState";
-import TableFilter from "@/components/table/TableFilter";
 import TableSearch from "@/components/table/TableSearch";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { hasCurrentUserRole } from "@/service/userService";
-import { getAllRegistrations } from "@/service/registrationService";
+import { getCurrentUserStatus } from "@/service/userService";
+import { getAllInternshipRegistrations } from "@/service/internshipService";
 import RegistrationTable from "@/app/_components/tables/RegistrationTable";
-import InternshipFilter from "@/app/_components/InternshipFilter";
+import StatusFilter from "@/app/_components/StatusFilter";
 
 async function page({ searchParams }) {
-  if (!(await hasCurrentUserRole("SUPERADMIN", "ADMIN"))) {
+  const { isAdmin, isStaff } = await getCurrentUserStatus();
+  if (!isAdmin && !isStaff) {
     throw new Error("Unauthorized");
   }
   const searchs = await searchParams;
-  const params = { ...searchs, type: "internship" };
-  const data = await getAllRegistrations(params);
+  const data = await getAllInternshipRegistrations(searchs);
 
   return (
     <div className="space-y-5">
@@ -38,7 +37,7 @@ async function page({ searchParams }) {
       <div className="flex flex-col md:flex-row rounded-md gap-4 items-center justify-between">
         <TableSearch />
         <div className="w-full md:w-fit flex gap-4 items-center">
-          <InternshipFilter />
+          <StatusFilter />
         </div>
       </div>
 

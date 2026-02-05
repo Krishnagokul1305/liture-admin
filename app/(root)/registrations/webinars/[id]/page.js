@@ -1,5 +1,6 @@
 import RegistrationForm from "@/app/_components/forms/RegistrationForm";
-import { getRegistrationById } from "@/service/registrationService";
+import RegistrationApproval from "@/app/_components/RegistrationApproval";
+import { getWebinarRegistrationById } from "@/service/webinarService";
 import Link from "next/link";
 
 export default async function Page({ params, searchParams }) {
@@ -7,25 +8,21 @@ export default async function Page({ params, searchParams }) {
   let { mode = "view" } = await searchParams;
 
   const pageConfig = {
-    edit: {
-      title: "Edit Registration",
-      description: "Update the registration details.",
-    },
     view: {
-      title: "View Registration",
-      description: "Review registration details in read-only mode.",
+      title: "View Webinar Registration",
+      description: "Review webinar registration details in read-only mode.",
     },
   };
 
-  mode = mode === "edit" ? "edit" : "view";
+  mode = "view"; // Force view mode only
 
   const current = pageConfig[mode];
-  const currentRegistration = await getRegistrationById(id);
+  const currentRegistration = await getWebinarRegistrationById(id);
 
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
       <Link
-        href={`/registrations/${currentRegistration.type}s`}
+        href="/registrations/webinars"
         className="inline-flex text-sm items-center text-primary font-medium mb-6 transition"
       >
         ← Back
@@ -43,6 +40,7 @@ export default async function Page({ params, searchParams }) {
         registrationId={id}
         initialData={currentRegistration}
       />
+      <RegistrationApproval registrationStatus="pending" />
     </div>
   );
 }
