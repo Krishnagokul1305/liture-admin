@@ -1,5 +1,5 @@
 import { auth } from "@/app/lib/auth";
-import { formatDateTime } from "@/app/utils/helper";
+import { formatDateTime, formatDate } from "@/app/utils/helper";
 
 const API_BASE_URL = process.env.DJANGO_API_URL;
 
@@ -53,7 +53,7 @@ export async function getAllMembershipRegistrations({
   const params = new URLSearchParams();
 
   if (search) params.append("search", search);
-  if (status) params.append("status", status);
+  if (status && status !== "all") params.append("status", status);
   params.append("page", page);
   params.append("limit", limit);
 
@@ -73,16 +73,15 @@ export async function getAllMembershipRegistrations({
   }
 
   const data = await res.json();
-
   return {
     registrations: data.results.map((reg) => ({
       id: reg.id,
-      user_email: reg.user_email,
-      title: reg.membership_title,
-      registered_at: reg.registered_at,
+      user_email: reg.user?.email || "",
+      title: reg.membership?.name || "",
+      registered_at: formatDate(reg.start_date),
       attended: reg.attended,
       status: reg.status,
-      reason: reg.reason,
+      reason: reg.reason || "No reason",
     })),
     pagination: {
       total: data.count,
@@ -136,29 +135,22 @@ export async function getMembershipRegistrationById(id) {
   }
 
   const registration = await res.json();
-
   return {
     ...registration,
     id: registration.id ?? id,
     _id: registration.id ?? id,
     type: "membership",
-    fullName:
-      registration.fullName ??
-      registration.full_name ??
-      registration.user_name ??
-      "",
-    email: registration.email ?? registration.user_email ?? "",
-    phoneNumber: registration.phoneNumber ?? registration.phone_number ?? "",
+    fullName: registration.user?.name ?? "",
+    email: registration.user?.email ?? "",
+    phoneNumber: registration.user?.phone_number ?? "",
     membership: registration.membership
       ? { _id: registration.membership }
-      : registration.membership_id
-        ? { _id: registration.membership_id }
-        : null,
-    createdAt: formatDateTime(
-      registration.createdAt ??
-        registration.created_at ??
-        registration.registered_at,
-    )?.date,
+      : null,
+    rejection_reason: registration?.rejection_reason,
+    membershipName: registration.membership?.name ?? "",
+    reason: registration?.reason ?? "",
+    createdAt: formatDateTime(registration.created_at)?.date,
+    registeredAt: formatDate(registration.start_date),
   };
 }
 
@@ -239,4 +231,55 @@ export async function deactivateMembership(id) {
   }
 
   return response;
+}
+
+export async function deleteMembershipRegistration(registrationId) {
+  const session = await auth();
+  const response = await fetch(
+    `${API_BASE_URL}/memberships/registrations/${registrationId}/`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${session?.accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to delete membership registration");
+  }
+
+  return response.status === 204;
+}
+
+/* ============================
+   CHANGE REGISTRATION STATUS
+============================ */
+export async function changeMembershipRegistrationStatus(
+  registrationId,
+  status,
+  rejectionReason = null,
+) {
+  const session = await auth();
+
+  const response = await fetch(
+    `${API_BASE_URL}/memberships/registrations/${registrationId}/change_status/`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.accessToken}`,
+      },
+      body: JSON.stringify({
+        status,
+        rejection_reason: rejectionReason,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to update membership registration status");
+  }
+
+  return await response.json();
 }

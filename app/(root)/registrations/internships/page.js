@@ -14,7 +14,6 @@ async function page({ searchParams }) {
   }
   const searchs = await searchParams;
   const data = await getAllInternshipRegistrations(searchs);
-
   return (
     <div className="space-y-5">
       <div className="flex md:items-center flex-col lg:flex-row justify-between mb-6">

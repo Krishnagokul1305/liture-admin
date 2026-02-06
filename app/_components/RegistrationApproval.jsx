@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,7 @@ const statusConfig = {
     textClass: "text-blue-700 dark:text-blue-200",
     label: "Pending",
   },
-  approved: {
+  accepted: {
     icon: CheckCircle2,
     badgeClass: "bg-green-600 text-primary-foreground hover:bg-green-700",
     containerClass:
@@ -39,141 +40,146 @@ const statusConfig = {
 
 export default function RegistrationApproval({
   registrationStatus,
+  rejectionReason,
   onApprove,
   onReject,
 }) {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  const statusInfo = statusConfig[registrationStatus];
-  const StatusIcon = statusInfo.icon;
-  const isPending = registrationStatus === "pending";
+  const form = useForm({
+    defaultValues: { reason: "" },
+  });
 
-  // Ensure statusInfo properties are safely accessed
-  const badgeClass = statusInfo?.badgeClass || "";
-  const containerClass = statusInfo?.containerClass || "";
-  const headingClass = statusInfo?.headingClass || "";
-  const textClass = statusInfo?.textClass || "";
+  const statusInfo = statusConfig[registrationStatus] || statusConfig.pending;
+  const StatusIcon = statusInfo?.icon || Clock;
 
-  const handleApprove = async () => {
-    setIsProcessing(true);
-    try {
-      await onApprove();
-      toast.success("Registration approved!");
-    } catch (error) {
-      toast.error("Failed to approve registration");
-      console.error(error);
-    } finally {
-      setIsProcessing(false);
-    }
+  const handleApprove = () => {
+    startTransition(async () => {
+      try {
+        await onApprove();
+        toast.success("Registration approved!");
+      } catch (error) {
+        toast.error("Failed to approve registration");
+        console.error(error);
+      }
+    });
   };
 
-  const handleReject = async () => {
-    if (!rejectReason.trim()) {
-      toast.error("Please provide a rejection reason");
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      await onReject(rejectReason);
-      toast.success("Registration rejected!");
-      setShowRejectForm(false);
-      setRejectReason("");
-    } catch (error) {
-      toast.error("Failed to reject registration");
-      console.error(error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  const handleReject = form.handleSubmit(({ reason }) => {
+    startTransition(async () => {
+      try {
+        await onReject(reason);
+        toast.success("Registration rejected!");
+        setShowRejectForm(false);
+        form.reset();
+      } catch (error) {
+        toast.error("Failed to reject registration");
+        console.error(error);
+      }
+    });
+  });
 
   return (
     <div className="space-y-4">
       {/* Status Badge */}
       <div className="flex items-center gap-2">
-        <StatusIcon className={`h-5 w-5 ${textClass}`} />
-        <Badge className={badgeClass}>{statusInfo.label}</Badge>
+        <StatusIcon className={`h-5 w-5 ${statusInfo.textClass}`} />
+        <Badge className={statusInfo.badgeClass}>{statusInfo.label}</Badge>
       </div>
 
-      {/* Approval Actions */}
-      {isPending && (
-        <div className={`rounded-lg p-4 ${containerClass}`}>
-          <h4 className={`mb-4 font-semibold ${headingClass}`}>
+      {/* Pending Actions */}
+      {(registrationStatus === "pending" ||
+        registrationStatus === "rejected") && (
+        <div className={`rounded-lg p-4 ${statusInfo.containerClass}`}>
+          <h4 className={`mb-4 font-semibold ${statusInfo.headingClass}`}>
             Approval Action Required
           </h4>
+
           {!showRejectForm ? (
             <div className="flex gap-3">
               <Button
                 onClick={handleApprove}
-                disabled={isProcessing}
-                className="bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
+                disabled={isPending}
+                className="bg-green-600 hover:bg-green-700"
               >
-                {isProcessing ? "Processing..." : "Approve"}
+                {isPending ? "Processing..." : "Approve"}
               </Button>
+
               <Button
                 onClick={() => setShowRejectForm(true)}
-                disabled={isProcessing}
+                disabled={isPending}
                 variant="outline"
-                className="border-destructive text-destructive dark:border-red-500 dark:text-red-400 hover:bg-destructive/10 dark:hover:bg-red-950"
+                className="border-destructive text-destructive"
               >
                 Reject
               </Button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <form onSubmit={handleReject} className="space-y-3">
               <div>
                 <label className="mb-2 block text-sm font-medium">
                   Rejection Reason *
                 </label>
                 <Textarea
                   placeholder="Enter the reason for rejecting this registration..."
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
                   rows={4}
                   className="resize-none"
+                  {...form.register("reason", {
+                    required: "Rejection reason is required",
+                  })}
                 />
+                {form.formState.errors.reason && (
+                  <p className="mt-1 text-sm text-destructive">
+                    {form.formState.errors.reason.message}
+                  </p>
+                )}
               </div>
+
               <div className="flex gap-2">
                 <Button
-                  onClick={handleReject}
-                  disabled={isProcessing || !rejectReason.trim()}
-                  className="bg-destructive hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800"
+                  type="submit"
+                  variant="destructive"
+                  className={"bg-destructive"}
+                  disabled={isPending}
                 >
-                  {isProcessing ? "Processing..." : "Confirm Rejection"}
+                  {isPending ? "Processing..." : "Confirm Rejection"}
                 </Button>
+
                 <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isPending}
                   onClick={() => {
                     setShowRejectForm(false);
-                    setRejectReason("");
+                    form.reset();
                   }}
-                  disabled={isProcessing}
-                  variant="outline"
                 >
                   Cancel
                 </Button>
               </div>
-            </div>
+            </form>
           )}
         </div>
       )}
 
-      {/* Rejection Reason */}
-      {registrationStatus === "rejected" && rejectReason && (
-        <div className={`rounded-lg p-4 ${containerClass}`}>
-          <h4 className={`mb-2 font-semibold ${headingClass}`}>
+      {/* Rejected */}
+      {registrationStatus === "rejected" && rejectionReason && (
+        <div className={`rounded-lg p-4 ${statusInfo.containerClass}`}>
+          <h4 className={`mb-2 font-semibold ${statusInfo.headingClass}`}>
             Rejection Reason
           </h4>
-          <p className={`text-sm ${textClass}`}>{rejectReason}</p>
+          <p className={`text-sm ${statusInfo.textClass}`}>{rejectionReason}</p>
         </div>
       )}
 
-      {/* Approved Message */}
-      {registrationStatus === "approved" && (
-        <div className={`rounded-lg p-4 ${containerClass}`}>
-          <h4 className={`mb-2 font-semibold ${headingClass}`}>Approved</h4>
-          <p className={`text-sm ${textClass}`}>
+      {/* Approved */}
+      {registrationStatus === "accepted" && (
+        <div className={`rounded-lg p-4 ${statusInfo.containerClass}`}>
+          <h4 className={`mb-2 font-semibold ${statusInfo.headingClass}`}>
+            Approved
+          </h4>
+          <p className={`text-sm ${statusInfo.textClass}`}>
             This registration was approved.
           </p>
         </div>

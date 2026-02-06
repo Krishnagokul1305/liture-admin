@@ -1,5 +1,5 @@
 import { auth } from "@/app/lib/auth";
-import { formatDateTime } from "@/app/utils/helper";
+import { formatDateTime, formatDate } from "@/app/utils/helper";
 
 const API_BASE_URL = process.env.DJANGO_API_URL;
 
@@ -100,10 +100,10 @@ export async function getAllWebinarRegistrations({
   const params = new URLSearchParams();
 
   if (search) params.append("search", search);
-  if (status) params.append("status", status);
+  if (status && status !== "all") params.append("status", status);
   params.append("page", page);
   params.append("limit", limit);
-
+  console.log(params.toString());
   const res = await fetch(
     `${API_BASE_URL}/webinars/registrations/?${params.toString()}`,
     {
@@ -124,12 +124,12 @@ export async function getAllWebinarRegistrations({
   return {
     registrations: data.results.map((reg) => ({
       id: reg.id,
-      user_email: reg.user_email,
-      title: reg.webinar_title,
-      registered_at: reg.registered_at,
+      user_email: reg.user?.email || "",
+      title: reg.webinar?.title || "",
+      registered_at: formatDate(reg.registered_at),
       attended: reg.attended,
       status: reg.status,
-      reason: reg.reason,
+      reason: reg.reason || "No reason",
     })),
     pagination: {
       total: data.count,
@@ -155,29 +155,18 @@ export async function getWebinarRegistrationById(id) {
   }
 
   const registration = await res.json();
-
   return {
     ...registration,
     id: registration.id ?? id,
     _id: registration.id ?? id,
     type: "webinar",
-    fullName:
-      registration.fullName ??
-      registration.full_name ??
-      registration.user_name ??
-      "",
-    email: registration.email ?? registration.user_email ?? "",
-    phoneNumber: registration.phoneNumber ?? registration.phone_number ?? "",
-    webinar: registration.webinar
-      ? { _id: registration.webinar }
-      : registration.webinar_id
-        ? { _id: registration.webinar_id }
-        : null,
-    createdAt: formatDateTime(
-      registration.createdAt ??
-        registration.created_at ??
-        registration.registered_at,
-    )?.date,
+    fullName: registration.user?.name ?? "",
+    email: registration.user?.email ?? "",
+    reason: registration?.reason ?? "No reason",
+    phoneNumber: registration.user?.phone_number ?? "",
+    webinar: registration.webinar ? { _id: registration.webinar } : null,
+    createdAt: formatDateTime(registration.created_at)?.date,
+    registeredAt: formatDate(registration.registered_at),
   };
 }
 
@@ -217,4 +206,55 @@ export async function deleteWebinar(id) {
   }
 
   return res.ok;
+}
+
+/* ============================
+   CHANGE REGISTRATION STATUS
+============================ */
+export async function changeWebinarRegistrationStatus(
+  registrationId,
+  status,
+  rejectionReason = null,
+) {
+  const session = await auth();
+  console.log(registrationId, status, rejectionReason);
+  const response = await fetch(
+    `${API_BASE_URL}/webinars/registrations/${registrationId}/change_status/`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.accessToken}`,
+      },
+      body: JSON.stringify({
+        status,
+        rejection_reason: rejectionReason,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to update webinar registration status");
+  }
+
+  return await response.json();
+}
+
+export async function deleteWebinarRegistration(registrationId) {
+  const session = await auth();
+  const response = await fetch(
+    `${API_BASE_URL}/webinars/registrations/${registrationId}/`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${session?.accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to delete webinar registration");
+  }
+
+  return response.status === 204; // Returns true on success
 }

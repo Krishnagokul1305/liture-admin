@@ -1,5 +1,5 @@
 import { auth } from "@/app/lib/auth";
-import { formatDateTime } from "@/app/utils/helper";
+import { formatDateTime, formatDate } from "@/app/utils/helper";
 
 const API_BASE_URL = process.env.DJANGO_API_URL;
 
@@ -62,7 +62,7 @@ export async function getAllInternshipRegistrations({
   const params = new URLSearchParams();
 
   if (search) params.append("search", search);
-  if (status) params.append("status", status);
+  if (status && status !== "all") params.append("status", status);
   params.append("page", page);
   params.append("limit", limit);
 
@@ -86,9 +86,9 @@ export async function getAllInternshipRegistrations({
   return {
     registrations: data.results.map((reg) => ({
       id: reg.id,
-      user_email: reg.user_email,
-      title: reg.internship_title,
-      registered_at: reg.registered_at,
+      user_email: reg.user?.email || "",
+      title: reg.internship?.title || "",
+      registered_at: formatDate(reg.applied_at),
       attended: reg.attended,
       status: reg.status,
       reason: reg.reason,
@@ -118,29 +118,21 @@ export async function getInternshipRegistrationById(id) {
   }
 
   const registration = await res.json();
-
   return {
     ...registration,
     id: registration.id ?? id,
     _id: registration.id ?? id,
     type: "internship",
-    fullName:
-      registration.fullName ??
-      registration.full_name ??
-      registration.user_name ??
-      "",
-    email: registration.email ?? registration.user_email ?? "",
-    phoneNumber: registration.phoneNumber ?? registration.phone_number ?? "",
+    resume: registration?.resume,
+    fullName: registration.user?.name ?? "",
+    email: registration.user?.email ?? "",
+    reason: registration?.reason ?? "No reason",
+    phoneNumber: registration.user?.phone_number ?? "",
     internship: registration.internship
       ? { _id: registration.internship }
-      : registration.internship_id
-        ? { _id: registration.internship_id }
-        : null,
-    createdAt: formatDateTime(
-      registration.createdAt ??
-        registration.created_at ??
-        registration.registered_at,
-    )?.date,
+      : null,
+    createdAt: formatDateTime(registration.created_at)?.date,
+    registeredAt: formatDate(registration.applied_at),
   };
 }
 
@@ -228,4 +220,55 @@ export async function deleteInternship(id) {
   }
 
   return res.ok;
+}
+
+/* ============================
+   CHANGE REGISTRATION STATUS
+============================ */
+export async function changeInternshipRegistrationStatus(
+  registrationId,
+  status,
+  rejectionReason = null,
+) {
+  const session = await auth();
+
+  const response = await fetch(
+    `${API_BASE_URL}/internships/registrations/${registrationId}/change_status/`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session?.accessToken}`,
+      },
+      body: JSON.stringify({
+        status,
+        rejection_reason: rejectionReason,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to update internship registration status");
+  }
+
+  return await response.json();
+}
+
+export async function deleteInternshipRegistration(registrationId) {
+  const session = await auth();
+  const response = await fetch(
+    `${API_BASE_URL}/internships/registrations/${registrationId}/`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${session?.accessToken}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to delete internship registration");
+  }
+
+  return response.status === 204;
 }

@@ -12,12 +12,14 @@ import userModel from "./model/user.model";
 import {
   createInternship,
   deleteInternship,
+  deleteInternshipRegistration,
   updateInternship,
 } from "@/service/internshipService";
 import {
   createWebinar,
   updateWebinar,
   deleteWebinar,
+  deleteWebinarRegistration,
 } from "@/service/webinarService";
 import {
   createMembership,
@@ -177,17 +179,63 @@ export async function updateRegistrationAction(id, data, type) {
   revalidatePath(`/registrations/${type}s`);
 }
 
-export async function updateMembershipRegistrationAction(id, data) {
-  await updateMembershipRegistration(id, data);
-  revalidatePath("/registrations/memberships");
-}
-
 export async function deleteMembershipRegistrationAction(id) {
   await deleteMembershipRegistration(id);
   revalidatePath("/registrations/memberships");
 }
 
+export async function deleteInternshipRegistrationAction(id) {
+  await deleteInternshipRegistration(id);
+  revalidatePath("/registrations/internships");
+}
+
+export async function deleteWebinarRegistrationAction(id) {
+  await deleteWebinarRegistration(id);
+  revalidatePath("/registrations/webinars");
+}
+
 export async function createMembershipRegistrationAction(data) {
   await createMembershipRegistration(data);
   revalidatePath("/registrations/memberships");
+}
+/* ============================
+   REGISTRATION STATUS CHANGES
+============================ */
+export async function changeWebinarRegistrationStatus(
+  registrationId,
+  status,
+  rejectionReason = null,
+) {
+  const { changeWebinarRegistrationStatus: changeStatus } =
+    await import("@/service/webinarService");
+  const response = await changeStatus(registrationId, status, rejectionReason);
+  revalidatePath("/registrations/webinars");
+  revalidatePath(`/registrations/webinars/${registrationId}`);
+  return response;
+}
+
+export async function changeInternshipRegistrationStatus(
+  registrationId,
+  status,
+  rejectionReason = null,
+) {
+  const { changeInternshipRegistrationStatus: changeStatus } =
+    await import("@/service/internshipService");
+  const response = await changeStatus(registrationId, status, rejectionReason);
+  revalidatePath("/registrations/internships");
+  revalidatePath(`/registrations/internships/${registrationId}`);
+  return response;
+}
+
+export async function changeMembershipRegistrationStatus(
+  registrationId,
+  status,
+  rejectionReason = null,
+) {
+  const { changeMembershipRegistrationStatus: changeStatus } =
+    await import("@/service/membershipService");
+  const response = await changeStatus(registrationId, status, rejectionReason);
+  revalidatePath("/registrations/memberships");
+  revalidatePath(`/registrations/memberships/${registrationId}`);
+  return response;
 }
