@@ -5,6 +5,9 @@ import ChartWrapper from "../_components/dashboard/ChartWrapper";
 import DashboardStats from "../_components/dashboard/DashboardStats";
 import RecentRegistrationsTable from "../_components/dashboard/RecentRegistrationsTable";
 import TableSkeleton from "../_components/dashboard/TableSkeleton";
+import { ChartPieLabelList } from "../_components/dashboard/ChartPieLabelList";
+import ChartPieSkeleton from "../_components/dashboard/ChartPieSkeleton";
+import ChartPieWrapper from "../_components/dashboard/ChartPieWrapper";
 
 function page() {
   return (
@@ -15,6 +18,10 @@ function page() {
       <Suspense fallback={<ChartSkeleton />}>
         <ChartWrapper />
       </Suspense>
+      <Suspense fallback={<ChartPieSkeleton />}>
+        <ChartPieWrapper />
+      </Suspense>
+
       <Suspense fallback={<TableSkeleton />}>
         <RecentRegistrationsTable />
       </Suspense>

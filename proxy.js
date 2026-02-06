@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
+import { getCurrentUser } from "@/service/userService";
 
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
@@ -11,7 +12,7 @@ export async function proxy(request) {
     "/auth/login",
   ];
   const isPublicRoute = publicRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 
   if (isPublicRoute) {
@@ -21,6 +22,16 @@ export async function proxy(request) {
   const session = await auth();
 
   if (!session) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  } catch {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

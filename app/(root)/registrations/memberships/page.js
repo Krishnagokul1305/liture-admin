@@ -1,7 +1,5 @@
 import { EmptyState } from "@/app/_components/EmptyState";
 import TableSearch from "@/components/table/TableSearch";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { getCurrentUserStatus } from "@/service/userService";
 import { getAllMembershipRegistrations } from "@/service/membershipService";
 import RegistrationTable from "@/app/_components/tables/RegistrationTable";
@@ -25,12 +23,6 @@ async function page({ searchParams }) {
             Manage user registrations for memberships.
           </p>
         </div>
-        <Button
-          className="mt-5 lg:mt-0"
-          href="/registrations/create?type=membership"
-        >
-          <Plus /> Add
-        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row rounded-md gap-4 items-center justify-between">

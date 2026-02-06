@@ -79,7 +79,6 @@ export async function getAllMembershipRegistrations({
       user_email: reg.user?.email || "",
       title: reg.membership?.name || "",
       registered_at: formatDate(reg.start_date),
-      attended: reg.attended,
       status: reg.status,
       reason: reg.reason || "No reason",
     })),

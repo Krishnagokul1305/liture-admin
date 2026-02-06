@@ -33,7 +33,7 @@ export function NavUser() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const { isLoading, user } = useCurrentUser();
-
+  console.log(user);
   if (isLoading || !user) {
     return (
       <Button variant="ghost" size="icon" className="rounded-full">

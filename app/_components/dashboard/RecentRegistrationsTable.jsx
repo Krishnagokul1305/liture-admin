@@ -1,5 +1,4 @@
 import DataTable from "@/components/table/Table";
-import { getRecentRegistrations } from "@/service/registrationService";
 import {
   Card,
   CardContent,
@@ -7,9 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getRecentRegistration } from "@/service/statsService";
 
 export default async function RecentRegistrationsTable() {
-  const data = await getRecentRegistrations();
+  const data = await getRecentRegistration();
 
   return (
     <Card className={"pb-0"}>
@@ -23,12 +23,12 @@ export default async function RecentRegistrationsTable() {
       <CardContent className="p-0 border-t">
         <DataTable
           columnCofig={[
-            { accessorKey: "fullName", header: "Name" },
+            { accessorKey: "full_name", header: "Name" },
             { accessorKey: "email", header: "Email" },
-            { accessorKey: "phoneNumber", header: "Phone" },
+            { accessorKey: "phone_number", header: "Phone" },
             { accessorKey: "type", header: "Type" },
             { accessorKey: "title", header: "Title" },
-            { accessorKey: "createdAt", header: "Registered On" },
+            { accessorKey: "created_at", header: "Registered On" },
           ]}
           data={data}
           count={data.length}

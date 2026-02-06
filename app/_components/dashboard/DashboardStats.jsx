@@ -21,12 +21,12 @@ const dashboardStats = [
   {
     key: "memberships",
     label: "Memberships",
-    footer: "Active paid memberships",
+    footer: "Active  memberships",
   },
   {
-    key: "membershipRegistrations",
-    label: "Member Signups",
-    footer: "Total membership registrations",
+    key: "normal_users",
+    label: "Regular Users",
+    footer: "Active non-admin users",
   },
 ];
 

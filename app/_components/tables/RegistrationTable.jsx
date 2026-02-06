@@ -22,28 +22,6 @@ export default function RegistrationTable({ data, pagination, type }) {
       { accessorKey: "reason", header: "Reason" },
       { accessorKey: "registered_at", header: "Registered On" },
       {
-        accessorKey: "attended",
-        header: "Attended",
-        customRender: (value) => {
-          const attended = value;
-          const statusClasses = attended
-            ? "bg-green-200 text-green-800"
-            : "bg-yellow-200 text-yellow-800";
-          const indicatorClasses = attended ? "bg-green-500" : "bg-yellow-500";
-
-          return (
-            <span
-              className={`px-2 py-1 flex items-center gap-2 w-fit rounded-md ${statusClasses}`}
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${indicatorClasses}`}
-              ></span>
-              {attended ? "Yes" : "No"}
-            </span>
-          );
-        },
-      },
-      {
         accessorKey: "status",
         header: "Status",
         customRender: (value) => {
@@ -84,6 +62,31 @@ export default function RegistrationTable({ data, pagination, type }) {
         },
       },
     ];
+    if (type == "webinars") {
+      baseColumns.splice(4, 0, {
+        accessorKey: "attended",
+        header: "Attended",
+        customRender: (value) => {
+          const attended = value;
+          const statusClasses = attended
+            ? "bg-green-200 text-green-800"
+            : "bg-yellow-200 text-yellow-800";
+          const indicatorClasses = attended ? "bg-green-500" : "bg-yellow-500";
+
+          return (
+            <span
+              className={`px-2 py-1 flex items-center gap-2 w-fit rounded-md ${statusClasses}`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${indicatorClasses}`}
+              ></span>
+              {attended ? "Yes" : "No"}
+            </span>
+          );
+        },
+      });
+    }
+
     return baseColumns;
   };
 

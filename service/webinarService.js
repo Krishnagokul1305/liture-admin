@@ -91,7 +91,7 @@ export async function getWebinarById(id) {
 }
 
 export async function getAllWebinarRegistrations({
-  search,
+  attended,
   status,
   page = 1,
   limit = 10,
@@ -99,11 +99,10 @@ export async function getAllWebinarRegistrations({
   const session = await auth();
   const params = new URLSearchParams();
 
-  if (search) params.append("search", search);
+  if (attended !== undefined) params.append("attended", String(attended));
   if (status && status !== "all") params.append("status", status);
   params.append("page", page);
   params.append("limit", limit);
-  console.log(params.toString());
   const res = await fetch(
     `${API_BASE_URL}/webinars/registrations/?${params.toString()}`,
     {

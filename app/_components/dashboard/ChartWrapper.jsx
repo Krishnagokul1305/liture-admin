@@ -1,8 +1,8 @@
-import { getPastRegistrationStats } from "@/service/registrationService";
+import { getPastRegistration } from "@/service/statsService";
 import Chart from "./Chart";
 
 async function ChartWrapper() {
-  const data = await getPastRegistrationStats();
+  const data = await getPastRegistration();
   return <Chart chartData={data} />;
 }
 

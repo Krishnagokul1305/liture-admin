@@ -55,6 +55,7 @@ export async function getAllInternships({
 export async function getAllInternshipRegistrations({
   search,
   status,
+  attended,
   page = 1,
   limit = 10,
 } = {}) {
@@ -63,6 +64,9 @@ export async function getAllInternshipRegistrations({
 
   if (search) params.append("search", search);
   if (status && status !== "all") params.append("status", status);
+  if (attended !== undefined && attended !== "all") {
+    params.append("attended", String(attended));
+  }
   params.append("page", page);
   params.append("limit", limit);
 

@@ -1,11 +1,10 @@
 import { EmptyState } from "@/app/_components/EmptyState";
 import TableSearch from "@/components/table/TableSearch";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import { getCurrentUserStatus } from "@/service/userService";
 import { getAllInternshipRegistrations } from "@/service/internshipService";
 import RegistrationTable from "@/app/_components/tables/RegistrationTable";
 import StatusFilter from "@/app/_components/StatusFilter";
+import TableFilter from "@/components/table/TableFilter";
 
 async function page({ searchParams }) {
   const { isAdmin, isStaff } = await getCurrentUserStatus();
@@ -25,18 +24,21 @@ async function page({ searchParams }) {
             Manage registrations for internships.
           </p>
         </div>
-        <Button
-          className={"mt-5 lg:mt-0"}
-          href={"/registrations/create?type=internship"}
-        >
-          <Plus /> Add
-        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row rounded-md gap-4 items-center justify-between">
         <TableSearch />
         <div className="w-full md:w-fit flex gap-4 items-center">
           <StatusFilter />
+          <TableFilter
+            name="attended"
+            className={"w-full"}
+            options={[
+              { label: "All", value: "all" },
+              { label: "Attended", value: "true" },
+              { label: "Not Attended", value: "false" },
+            ]}
+          />
         </div>
       </div>
 
