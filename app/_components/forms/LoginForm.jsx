@@ -28,8 +28,7 @@ export function LoginForm({ className, ...props }) {
       toast.success("Logged in successfully");
     } catch (error) {
       if (error?.digest?.startsWith("NEXT_REDIRECT")) return;
-
-      toast.error(error.message || "Invalid email or password");
+      toast.error("Invalid email or password");
     }
   };
 
@@ -73,6 +72,12 @@ export function LoginForm({ className, ...props }) {
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? "Logging in..." : "Login"}
         </Button>
+        <p className="text-sm text-muted-foreground text-center">
+          Don’t have an account?{" "}
+          <Link href="/signup" className="underline text-primary">
+            Sign up
+          </Link>
+        </p>
       </div>
     </form>
   );

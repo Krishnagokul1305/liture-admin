@@ -10,7 +10,6 @@ export async function getAllInternships({
   page = 1,
   limit = 10,
 } = {}) {
-  const session = await auth();
   const params = new URLSearchParams();
 
   if (search) params.append("title", search);
@@ -32,7 +31,6 @@ export async function getAllInternships({
     `${API_BASE_URL}/internships/list/?${params.toString()}`,
     {
       headers: {
-        Authorization: `Bearer ${session?.accessToken}`,
         "Content-Type": "application/json",
       },
     },

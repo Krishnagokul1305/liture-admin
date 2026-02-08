@@ -1,67 +1,59 @@
-import { EmptyState } from "@/app/_components/EmptyState";
-import TableFilter from "@/components/table/TableFilter";
-import TableSearch from "@/components/table/TableSearch";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { getCurrentUserStatus } from "@/service/userService";
-import { getAllInternships } from "@/service/internshipService";
-import InternshipTable from "@/app/_components/tables/InternshipTable";
+import { Animated } from "@/app/_components/Animated";
+import Searchbar from "@/app/_components/Searchbar";
+import { container, fadeMove } from "@/app/utils/animations";
+import IntershipListing from "@/app/_components/IntershipListing";
 
 async function page({ searchParams }) {
-  const { isAdmin, isStaff } = await getCurrentUserStatus();
-  if (!isAdmin && !isStaff) {
-    throw new Error("Unauthorized");
-  }
-  const params = await searchParams;
-  const data = await getAllInternships(params);
+  const search = await searchParams;
   return (
-    <div className="space-y-5">
-      <div className="flex md:items-center  flex-col lg:flex-row justify-between mb-6">
-        <div>
-          <h1 className="text-xl md:text-3xl font-bold">Internship</h1>
-          <p className="text-sm md:text-base text-muted-foreground mt-1">
-            Manage internship listings, schedules, and visibility for users.
-          </p>
-        </div>
-        <Button className={"mt-5 lg:mt-0"} href={"/internships/create"}>
-          <Plus /> Add
-        </Button>
-      </div>
-      <div className="flex flex-col md:flex-row rounded-md gap-4  items-center justify-between">
-        <TableSearch />
-        <div className="w-full md:w-fit flex gap-4 items-center">
-          <TableFilter
-            name="time"
-            className={"w-full"}
-            options={[
-              { label: "All", value: "all" },
-              { label: "Past", value: "past" },
-              { label: "Upcoming", value: "upcoming" },
-            ]}
-          />
-          <TableFilter
-            name="is_active"
-            className={"w-full"}
-            options={[
-              { label: "All", value: "all" },
-              { label: "Active", value: "true" },
-              { label: "Inactive", value: "false" },
-            ]}
-          />
-        </div>
-      </div>
+    <div className="min-h-screen mt-16">
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/90 via-primary to-primary/80 dark:from-primary/70 dark:via-primary dark:to-primary/60">
+        {/* Diagonal pattern overlay */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-20 dark:opacity-25
+             bg-[linear-gradient(135deg,rgba(255,255,255,0.12)_1px,transparent_1px)]
+             bg-[length:80px_80px]"
+        />
 
-      {data?.pagination?.total === 0 ? (
-        <EmptyState
-          title="No internships yet"
-          message="There aren't any internships at the moment"
-        />
-      ) : (
-        <InternshipTable
-          data={data?.internships}
-          pagination={data?.pagination}
-        />
-      )}
+        {/* Content */}
+        <Animated
+          variants={container(0.2, 0)}
+          className="relative mx-auto max-w-7xl px-6 py-16 text-center"
+        >
+          <Animated variants={fadeMove("up", 30)}>
+            <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
+              Explore Internships
+            </h1>
+          </Animated>
+
+          <Animated variants={fadeMove("up", 30, 0.15)}>
+            <p className="mx-auto max-w-2xl text-primary-foreground/90">
+              Gain hands-on experience with real projects, expert mentorship,
+              and career-ready learning.
+            </p>
+          </Animated>
+        </Animated>
+      </div>
+      <div className="max-w-7xl mx-auto py-16 px-6">
+        <Animated
+          variants={container(0.15)}
+          className="mb-8 flex flex-col md:flex-row gap-3 items-center justify-between"
+        >
+          <Animated variants={fadeMove("up", 20)}>
+            <p className="text-lg font-medium text-gray-900">
+              internships for you
+            </p>
+          </Animated>
+
+          <Animated
+            variants={fadeMove("up", 20, 0.1)}
+            className="w-full md:w-fit"
+          >
+            <Searchbar />
+          </Animated>
+        </Animated>
+        <IntershipListing searchParams={search} />
+      </div>
     </div>
   );
 }

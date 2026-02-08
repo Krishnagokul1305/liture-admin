@@ -2,6 +2,8 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import { Toaster } from "sonner";
+import QueryProvider from "@/components/QueryProvider";
+import { SessionProvider } from "next-auth/react";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -11,17 +13,21 @@ const poppins = Poppins({
 });
 
 export const metadata = {
-  title: "Liture Edutech | Admin",
+  title: "Liture EdTech",
   description:
-    "Liture EdTech Admin Dashboard provides centralized control to manage users, roles, content, and platform operations efficiently.",
+    "Liture EdTech — industry-led webinars, hands-on internships, and membership programs to advance careers. Secure admin tools to manage users, content, and platform operations.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={`${poppins.variable} antialiased`}>
-        <Toaster position="top-center" />
-        <ThemeProvider>{children}</ThemeProvider>
+        <QueryProvider>
+          <SessionProvider>
+            <Toaster position="top-center" />
+            <ThemeProvider>{children}</ThemeProvider>
+          </SessionProvider>
+        </QueryProvider>
       </body>
     </html>
   );

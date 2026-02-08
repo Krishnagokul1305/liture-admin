@@ -26,10 +26,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import {
-  createMembershipRegistrationAction,
-  updateMembershipRegistrationAction,
-} from "@/app/lib/action";
+// import {
+//   createMembershipRegistrationAction,
+//   updateMembershipRegistrationAction,
+// } from "@/app/lib/action";
 
 /* -------------------- schema -------------------- */
 const membershipRegistrationSchema = z.object({
@@ -69,22 +69,22 @@ export default function MembershipRegistrationForm({
     setSubmitting(true);
 
     try {
-      if (isCreate) {
-        toast.promise(createMembershipRegistrationAction(data), {
-          loading: "Creating registration...",
-          success: "Registration created!",
-          error: "Something went wrong",
-        });
-      } else {
-        toast.promise(
-          updateMembershipRegistrationAction(registrationId, data),
-          {
-            loading: "Updating registration...",
-            success: "Registration updated!",
-            error: "Something went wrong",
-          }
-        );
-      }
+      // if (isCreate) {
+      //   toast.promise(createMembershipRegistrationAction(data), {
+      //     loading: "Creating registration...",
+      //     success: "Registration created!",
+      //     error: "Something went wrong",
+      //   });
+      // } else {
+      //   toast.promise(
+      //     updateMembershipRegistrationAction(registrationId, data),
+      //     {
+      //       loading: "Updating registration...",
+      //       success: "Registration updated!",
+      //       error: "Something went wrong",
+      //     }
+      //   );
+      // }
       router.refresh();
       router.back();
     } catch (error) {

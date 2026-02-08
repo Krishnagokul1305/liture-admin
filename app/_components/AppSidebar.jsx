@@ -18,23 +18,23 @@ const data = {
   navMain: [
     {
       title: "Home",
-      url: "/",
+      url: "/admin",
       icon: Home,
       isActive: true,
     },
     {
       title: "Internships",
-      url: "/internships",
+      url: "/admin/internships",
       icon: Briefcase,
     },
     {
       title: "Memberships",
-      url: "/memberships",
+      url: "/admin/memberships",
       icon: Users,
     },
     {
       title: "Webinars",
-      url: "/webinars",
+      url: "/admin/webinars",
       icon: Video,
     },
     {
@@ -44,21 +44,21 @@ const data = {
       items: [
         {
           title: "Internships",
-          url: "/registrations/internships",
+          url: "/admin/registrations/internships",
         },
         {
           title: "Webinar",
-          url: "/registrations/webinars",
+          url: "/admin/registrations/webinars",
         },
         {
           title: "Memberships",
-          url: "/registrations/memberships",
+          url: "/admin/registrations/memberships",
         },
       ],
     },
     {
       title: "Users",
-      url: "/users",
+      url: "/admin/users",
       icon: Users,
     },
   ],

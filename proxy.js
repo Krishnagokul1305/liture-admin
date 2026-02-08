@@ -4,18 +4,9 @@ import { getCurrentUser } from "@/service/userService";
 
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
+  const isProtectedRoute = pathname.includes("/admin");
 
-  const publicRoutes = [
-    "/login",
-    "/forgot-password",
-    "/reset-password",
-    "/auth/login",
-  ];
-  const isPublicRoute = publicRoutes.some((route) =>
-    pathname.startsWith(route),
-  );
-
-  if (isPublicRoute) {
+  if (!isProtectedRoute) {
     return NextResponse.next();
   }
 
@@ -27,11 +18,16 @@ export async function proxy(request) {
 
   try {
     const user = await getCurrentUser();
-
     if (!user) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
-  } catch {
+
+    const hasAdminAccess = Boolean(user.is_staff) || Boolean(user.is_superuser);
+
+    if (!hasAdminAccess) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  } catch (err) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

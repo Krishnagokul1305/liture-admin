@@ -1,0 +1,162 @@
+"use client";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
+import InputField from "../InputField";
+import { signUpSchema } from "../../lib/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+// import { signUpAction } from "../../lib/action";
+import { useRouter } from "next/navigation";
+import { signupUserAction } from "@/app/lib/action";
+import * as z from "zod";
+
+export const customSignupSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+
+  email: z.string().email("Please enter a valid email"),
+
+  phone_number: z
+    .string()
+    .min(10, "Phone number must be at least 10 digits")
+    .regex(/^\d+$/, "Phone number must contain only digits"),
+
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+function SignupForm({ className, ...props }) {
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    defaultValues: {
+      email: "frontend@gmail.com",
+      name: "frontend",
+      password: "gokul2005$.",
+      phone_number: "9876543210",
+    },
+    resolver: zodResolver(customSignupSchema),
+  });
+
+  const router = useRouter();
+
+  const onSubmit = async (data) => {
+    try {
+      await signupUserAction(data);
+      toast.success("Account created successfully");
+      router.push("/login");
+    } catch (error) {
+      // Ignore Next.js redirect errors
+      if (error?.digest?.startsWith("NEXT_REDIRECT")) return;
+      let serverErrors = null;
+
+      // Case 1: error object already has errors (non–server-action case)
+      if (error && typeof error === "object" && "errors" in error) {
+        serverErrors = error.errors;
+      } else {
+        // Case 2: error.message contains JSON string
+        try {
+          const maybeString =
+            typeof error === "string"
+              ? error
+              : typeof error?.message === "string"
+                ? error.message
+                : "";
+
+          const parsed = JSON.parse(maybeString);
+          serverErrors = parsed?.errors ?? null;
+        } catch {
+          serverErrors = null;
+        }
+      }
+
+      if (serverErrors) {
+        Object.entries(serverErrors).forEach(([field, messages]) => {
+          setError(field, {
+            type: "server",
+            message: Array.isArray(messages) ? messages[0] : messages,
+          });
+        });
+        return;
+      }
+
+      toast.error(error?.message || "Signup failed");
+    }
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className={cn("flex flex-col gap-6", className)}
+      {...props}
+    >
+      {/* Header */}
+      <div className="flex flex-col items-center gap-2 text-center">
+        <h1 className="text-2xl font-bold">Create an account</h1>
+        <p className="text-muted-foreground text-sm text-balance">
+          Sign up with your details
+        </p>
+      </div>
+
+      {/* Fields */}
+      <div className="grid gap-6">
+        <InputField
+          id="name"
+          label="Full Name"
+          type="text"
+          placeholder="John Doe"
+          register={register("name")}
+          error={errors.name}
+          disabled={isSubmitting}
+        />
+
+        <InputField
+          id="email"
+          label="Email"
+          type="email"
+          placeholder="m@example.com"
+          register={register("email")}
+          error={errors.email}
+          disabled={isSubmitting}
+        />
+
+        <InputField
+          id="phone_number"
+          label="Phone Number"
+          type="tel"
+          placeholder="9876543210"
+          register={register("phone_number")}
+          error={errors.phone_number}
+          disabled={isSubmitting}
+        />
+
+        <InputField
+          id="password"
+          label="Password"
+          type="password"
+          placeholder="********"
+          register={register("password")}
+          error={errors.password}
+          disabled={isSubmitting}
+        />
+
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Creating account..." : "Sign up"}
+        </Button>
+
+        <p className="text-sm text-muted-foreground text-center">
+          Already have an account?{" "}
+          <Link href="/login" className="underline text-primary">
+            Login
+          </Link>
+        </p>
+      </div>
+    </form>
+  );
+}
+
+export default SignupForm;

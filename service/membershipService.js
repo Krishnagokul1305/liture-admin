@@ -22,18 +22,13 @@ export async function createMembership(data) {
   return response;
 }
 
-/**
- * READ ALL
- */
 export async function getAllMemberships(filter = {}) {
-  const session = await auth();
   const params = new URLSearchParams(filter);
 
   const res = await fetch(
     `${API_BASE_URL}/memberships/list/?${params.toString()}`,
     {
       headers: {
-        Authorization: `Bearer ${session?.accessToken}`,
         "Content-Type": "application/json",
       },
     },

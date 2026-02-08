@@ -68,6 +68,28 @@ export async function createUser(data) {
   return response;
 }
 
+export async function registerUser(data) {
+  const res = await fetch(`${API_BASE_URL}/auth/register/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const response = await res.json();
+  if (!res.ok) {
+    throw new Error(
+      JSON.stringify({
+        errors: response.errors,
+        detail: response?.detail,
+      }),
+    );
+  }
+
+  return response;
+}
+
 export async function updateUser(id, data) {
   const session = await auth();
   const res = await fetch(`${API_BASE_URL}/users/${id}/`, {

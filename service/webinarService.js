@@ -13,13 +13,11 @@ export async function getAllWebinars({
   page = 1,
   page_size = 10,
 } = {}) {
-  const session = await auth();
   const params = new URLSearchParams();
 
   if (search) params.append("title", search);
   if (is_active) params.append("is_active", is_active);
 
-  // Handle time filter with event_date_before and event_date_after
   if (time && time !== "all") {
     const currentDate = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
     if (time === "past") {
@@ -36,7 +34,6 @@ export async function getAllWebinars({
     `${API_BASE_URL}/webinars/list/?${params.toString()}`,
     {
       headers: {
-        Authorization: `Bearer ${session?.accessToken}`,
         "Content-Type": "application/json",
       },
     },
@@ -57,9 +54,6 @@ export async function getAllWebinars({
   };
 }
 
-/* ============================
-   CREATE WEBINAR
-============================ */
 export async function createWebinar(data) {
   const session = await auth();
   const res = await fetch(`${API_BASE_URL}/webinars/list/`, {

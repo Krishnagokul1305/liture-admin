@@ -26,8 +26,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const tokens = await loginRes.json();
 
-          console.log(tokens);
-
           if (!loginRes.ok || !tokens.access) {
             throw new Error(tokens.detail || "Invalid credentials");
           }
@@ -44,8 +42,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           );
 
           const userData = await userRes.json();
-
-          console.log(userData);
 
           if (!userRes.ok) throw new Error("Could not fetch user profile");
 

@@ -6,7 +6,12 @@ import { sendResetPasswordEmail, sendWelcomeEmail } from "./email";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 
-import { createUser, deleteUser, updateUser } from "../../service/userService";
+import {
+  createUser,
+  deleteUser,
+  registerUser,
+  updateUser,
+} from "../../service/userService";
 import { revalidatePath } from "next/cache";
 import userModel from "./model/user.model";
 import {
@@ -51,10 +56,13 @@ export async function signOutAction() {
 }
 
 export async function registerUserAction(data) {
-  console.log(data);
   const user = await createUser(data);
   revalidatePath("/users");
-  // await sendWelcomeEmail(user.email, user.name);
+  return user;
+}
+
+export async function signupUserAction(data) {
+  const user = await registerUser(data);
   return user;
 }
 

@@ -1,30 +1,21 @@
-import { Suspense } from "react";
-import ChartSkeleton from "../_components/dashboard/ChartSkeleton";
-import DashboardStatsSkeleton from "../_components/dashboard/DashboardStatsSkeleton";
-import ChartWrapper from "../_components/dashboard/ChartWrapper";
-import DashboardStats from "../_components/dashboard/DashboardStats";
-import RecentRegistrationsTable from "../_components/dashboard/RecentRegistrationsTable";
-import TableSkeleton from "../_components/dashboard/TableSkeleton";
-import { ChartPieLabelList } from "../_components/dashboard/ChartPieLabelList";
-import ChartPieSkeleton from "../_components/dashboard/ChartPieSkeleton";
-import ChartPieWrapper from "../_components/dashboard/ChartPieWrapper";
+import AboutUsSection from "../_components/sections/AboutUsSection";
+import AchievementsSection from "../_components/sections/AchievementsSection";
+import ContactSection from "../_components/sections/ContactSection";
+import HeroSection from "../_components/sections/HeroSection";
+import MembershipSection from "../_components/sections/MembershipSection";
+import MembersSection from "../_components/sections/MembersSection";
+import OpportunitiesSection from "../_components/sections/OpportunitiesSection";
 
 function page() {
   return (
-    <div className="flex flex-1 flex-col gap-4 pt-0">
-      <Suspense fallback={<DashboardStatsSkeleton />}>
-        <DashboardStats />
-      </Suspense>
-      <Suspense fallback={<ChartSkeleton />}>
-        <ChartWrapper />
-      </Suspense>
-      <Suspense fallback={<ChartPieSkeleton />}>
-        <ChartPieWrapper />
-      </Suspense>
-
-      <Suspense fallback={<TableSkeleton />}>
-        <RecentRegistrationsTable />
-      </Suspense>
+    <div className="w-full">
+      <HeroSection />
+      <AboutUsSection />
+      <AchievementsSection />
+      <OpportunitiesSection />
+      <MembershipSection />
+      <MembersSection />
+      <ContactSection />
     </div>
   );
 }
