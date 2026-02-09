@@ -8,7 +8,6 @@ import { signInSchema } from "../../lib/zod";
 import { useForm } from "react-hook-form";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
-import { signInAction } from "../../lib/action";
 import { useRouter } from "next/navigation";
 
 export function LoginForm({ className, ...props }) {
@@ -21,14 +20,19 @@ export function LoginForm({ className, ...props }) {
   });
 
   const router = useRouter();
-
   const onSubmit = async (data) => {
-    try {
-      await signInAction(data);
-      toast.success("Logged in successfully");
-    } catch (error) {
-      if (error?.digest?.startsWith("NEXT_REDIRECT")) return;
+    const res = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    if (res?.error) {
       toast.error("Invalid email or password");
+    } else {
+      toast.success("Logged in successfully");
+      router.push("/");
+      router.refresh();
     }
   };
 

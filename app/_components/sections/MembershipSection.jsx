@@ -6,7 +6,7 @@ import { fadeMove } from "@/app/utils/animations";
 export default async function MembershipSection() {
   let plans = [];
   try {
-    plans = await getAllMemberships();
+    plans = await getAllMemberships({}, true);
   } catch (err) {
     console.error("Failed to load memberships in server component:", err);
     plans = [];

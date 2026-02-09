@@ -9,6 +9,7 @@ export async function getAllInternships({
   time,
   page = 1,
   limit = 10,
+  cache = false,
 } = {}) {
   const params = new URLSearchParams();
 
@@ -34,6 +35,7 @@ export async function getAllInternships({
         "Content-Type": "application/json",
       },
     },
+    { next: cache ? { revalidate: 60 } : { cache: "no-store" } },
   );
 
   const data = await res.json();
@@ -114,7 +116,6 @@ export async function getInternshipRegistrationById(id) {
     },
     cache: "no-store",
   });
-
   if (!res.ok) {
     throw new Error("Registration not found");
   }
@@ -182,6 +183,7 @@ export async function getInternshipById(id) {
       "Content-Type": "application/json",
     },
   });
+
   const data = await res.json();
   return data;
 }
@@ -273,4 +275,21 @@ export async function deleteInternshipRegistration(registrationId) {
   }
 
   return response.status === 204;
+}
+
+export async function applyInternship(formData) {
+  const session = await auth();
+  formData.append("user_id", session?.user?.id);
+  const res = await fetch(`${API_BASE_URL}/internships/registrations/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session?.accessToken}`,
+    },
+    body: formData,
+  });
+
+  const data = await res.json();
+  if (!res.ok)
+    throw new Error(data?.error || data?.detail || JSON.stringify(data));
+  return data;
 }

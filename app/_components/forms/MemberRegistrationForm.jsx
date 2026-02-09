@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTransition } from "react";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -13,52 +14,38 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 import { toast } from "sonner";
-// import { useRegisterMembership } from "../../hooks/useRegisterMembership";
-// import Spinner from "../Spinner";
+import { membershipregistrationaction } from "@/app/lib/action";
 
 const membershipFormSchema = z.object({
-  fullName: z.string().min(2, "Full name is required"),
-  email: z.string().email("Enter a valid email"),
-  phoneNumber: z.string().min(10, "Enter a valid phone number").max(15),
+  membership_id: z.number().min(1),
   reason: z.string().min(10, "Please explain briefly"),
-  membership: z.string().min(1, "Select a membership"),
 });
 
 export default function MembershipRegistrationForm({ membershipId, close }) {
-  // const { register, submitting } = useRegisterMembership();
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm({
     resolver: zodResolver(membershipFormSchema),
     defaultValues: {
-      fullName: "",
-      email: "",
-      phoneNumber: "",
       reason: "",
-      membership: membershipId,
+      membership_id: membershipId,
     },
   });
 
   const onSubmit = (values) => {
-    // register(values, {
-    //   onSuccess: () => {
-    //     toast.success("Registered successfully");
-    //     close();
-    //     form.reset({
-    //       ...form.getValues(),
-    //       fullName: "",
-    //       email: "",
-    //       phoneNumber: "",
-    //       reason: "",
-    //     });
-    //   },
-    //   onError: (err) => {
-    //     toast.error(err.message);
-    //   },
-    // });
+    startTransition(async () => {
+      try {
+        await membershipregistrationaction(values);
+        toast.success("Registered successfully");
+        close?.();
+        form.reset({ reason: "", membership_id: membershipId });
+      } catch (err) {
+        toast.error(err?.message || "Registration failed");
+      }
+    });
   };
 
   return (
@@ -67,49 +54,10 @@ export default function MembershipRegistrationForm({ membershipId, close }) {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-5 max-w-lg"
       >
-        {/* Full Name */}
         <FormField
           control={form.control}
-          name="fullName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Full Name</FormLabel>
-              <FormControl>
-                <Input placeholder="John Doe" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Email */}
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="john@email.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Phone */}
-        <FormField
-          control={form.control}
-          name="phoneNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone Number</FormLabel>
-              <FormControl>
-                <Input placeholder="9876543210" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          name="membership_id"
+          render={({ field }) => <input type="hidden" {...field} />}
         />
 
         <FormField
@@ -131,8 +79,8 @@ export default function MembershipRegistrationForm({ membershipId, close }) {
         />
 
         {/* Submit */}
-        <Button type="submit" className="w-full">
-          {/* {submitting ? <Spinner size={20} /> : "Submit"} */}apply
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? "Submitting..." : "Submit"}
         </Button>
       </form>
     </Form>

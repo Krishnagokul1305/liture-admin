@@ -113,7 +113,7 @@ export default function RegistrationTable({ data, pagination, type }) {
           {
             label: "view",
             action: () => {
-              router.push(`/registrations/${type}/${row?.id}`);
+              router.push(`/admin/registrations/${type}/${row?.id}`);
             },
           },
           {

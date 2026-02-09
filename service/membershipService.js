@@ -22,7 +22,7 @@ export async function createMembership(data) {
   return response;
 }
 
-export async function getAllMemberships(filter = {}) {
+export async function getAllMemberships(filter = {}, cache = false) {
   const params = new URLSearchParams(filter);
 
   const res = await fetch(
@@ -32,6 +32,7 @@ export async function getAllMemberships(filter = {}) {
         "Content-Type": "application/json",
       },
     },
+    { next: cache ? { revalidate: 60 } : { cache: "no-store" } },
   );
 
   const data = await res.json();
@@ -246,9 +247,6 @@ export async function deleteMembershipRegistration(registrationId) {
   return response.status === 204;
 }
 
-/* ============================
-   CHANGE REGISTRATION STATUS
-============================ */
 export async function changeMembershipRegistrationStatus(
   registrationId,
   status,
@@ -276,4 +274,22 @@ export async function changeMembershipRegistrationStatus(
   }
 
   return await response.json();
+}
+
+export async function registerMembership({ membership_id, reason }) {
+  const session = await auth();
+
+  const res = await fetch(`${API_BASE_URL}/memberships/registrations/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session?.accessToken}`,
+    },
+    body: JSON.stringify({ membership_id, reason, user_id: session?.user?.id }),
+  });
+
+  const data = await res.json();
+  if (!res.ok)
+    throw new Error(data?.error || data?.detail || JSON.stringify(data));
+  return data;
 }

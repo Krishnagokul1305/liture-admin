@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTransition, useRef, useState } from "react";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -13,102 +14,66 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-// import Spinner from "../Spinner";
-// import { useRegisterInternship } from "../../hooks/useRegisterInternship";
+import { internshipregistrationaction } from "@/app/lib/action";
 
 const internshipFormSchema = z.object({
-  fullName: z.string().min(2, "Full name is required"),
-  email: z.string().email("Enter a valid email"),
-  phoneNumber: z.string().min(10, "Enter a valid phone number").max(15),
+  internship_id: z.number().min(1),
   reason: z.string().min(10, "Please explain briefly"),
-  internship: z.string().min(1, "Select an internship"),
+  resume: z
+    .any()
+    .refine((files) => files && files.length > 0, "Resume is required"),
 });
 
 export default function InternshipRegistrationForm({ internshipId, close }) {
-  //   const { register, submitting } = useRegisterInternship();
+  const [isPending, startTransition] = useTransition();
+  const fileInputRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(internshipFormSchema),
     defaultValues: {
-      fullName: "",
-      email: "",
-      phoneNumber: "",
       reason: "",
-      internship: internshipId,
+      internship_id: internshipId,
+      resume: undefined,
     },
   });
 
   const onSubmit = (values) => {
-    // register(values, {
-    //   onSuccess: () => {
-    //     toast.success("Internship registration successful");
-    //     close();
-    //     form.reset({
-    //       ...form.getValues(),
-    //       fullName: "",
-    //       email: "",
-    //       phoneNumber: "",
-    //       reason: "",
-    //     });
-    //   },
-    //   onError: (err) => {
-    //     toast.error(err.message);
-    //   },
-    // });
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("internship_id", values.internship_id);
+        formData.append("reason", values.reason);
+        if (values.resume?.[0]) {
+          formData.append("resume", values.resume[0]);
+        }
+
+        await internshipregistrationaction(formData);
+        toast.success("Internship registration successful");
+        close?.();
+        form.reset({
+          reason: "",
+          internship_id: internshipId,
+          resume: undefined,
+        });
+      } catch (err) {
+        toast.error(err?.message || "Registration failed");
+      }
+    });
   };
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
         className="space-y-5 max-w-lg"
       >
-        {/* Full Name */}
         <FormField
           control={form.control}
-          name="fullName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Full Name</FormLabel>
-              <FormControl>
-                <Input placeholder="John Doe" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Email */}
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="john@email.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Phone */}
-        <FormField
-          control={form.control}
-          name="phoneNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone Number</FormLabel>
-              <FormControl>
-                <Input placeholder="9876543210" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          name="internship_id"
+          render={({ field }) => <input type="hidden" {...field} />}
         />
 
         {/* Reason */}
@@ -130,9 +95,66 @@ export default function InternshipRegistrationForm({ internshipId, close }) {
           )}
         />
 
+        {/* Resume */}
+        <FormField
+          control={form.control}
+          name="resume"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Resume (PDF)</FormLabel>
+              <FormControl>
+                <div className="space-y-3">
+                  <div
+                    className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
+                      isDragging
+                        ? "border-primary bg-primary/5"
+                        : "border-gray-300 hover:bg-muted"
+                    }`}
+                    onClick={() => fileInputRef.current?.click()}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragging(true);
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDragging(false);
+                      field.onChange(e.dataTransfer.files);
+                    }}
+                  >
+                    <p className="text-sm text-gray-500">
+                      <span className="font-semibold">Click to upload</span> or
+                      drag and drop
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      PDF only, up to 10MB
+                    </p>
+                    {field.value?.[0]?.name && (
+                      <p className="mt-2 text-xs font-medium text-gray-700">
+                        {field.value[0].name}
+                      </p>
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    onChange={(e) => field.onChange(e.target.files)}
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* Submit */}
-        <Button type="submit" className="w-full">
-          {/* {submitting ? <Spinner size={20} /> : "Apply Now"} */}apply
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? "Applying..." : "Apply Now"}
         </Button>
       </form>
     </Form>

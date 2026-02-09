@@ -13,8 +13,8 @@ import { resetPasswordAction } from "@/app/lib/action";
 
 const resetPasswordSchema = z
   .object({
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(6),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -38,7 +38,7 @@ export function ResetPasswordForm({ token }) {
         toast.error("Invalid or expired reset link");
         return;
       }
-      await resetPasswordAction(token, data.password);
+      await resetPasswordAction({ token, newPassword: data.password });
       toast.success("Password reset successful");
       router.push("/login");
     } catch (error) {

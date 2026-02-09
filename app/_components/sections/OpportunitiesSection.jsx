@@ -5,32 +5,18 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
 import { Animated } from "../Animated";
 import { fadeMove } from "@/app/utils/animations";
 import { useRouter } from "next/navigation";
 import { activities } from "@/service/constantservice";
+import { useRef } from "react";
 
 function OpportunitiesSection() {
-  const [api, setApi] = useState();
-  const [current, setCurrent] = useState(0);
-  const [count, setCount] = useState(0);
   const router = useRouter();
-
-  useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap());
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api]);
+  const carouselRef = useRef(null);
 
   return (
     <section
@@ -52,30 +38,11 @@ function OpportunitiesSection() {
               designed to help you learn, grow, and succeed.
             </p>
           </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={() => api?.scrollPrev()}
-              size="icon"
-              className="h-14 w-14 rounded-full"
-              disabled={!api?.canScrollPrev()}
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-            <Button
-              onClick={() => api?.scrollNext()}
-              size="icon"
-              className="h-14 w-14 rounded-full"
-              disabled={!api?.canScrollNext()}
-            >
-              <ChevronRight className="h-6 w-6" />
-            </Button>
-          </div>
         </Animated>
 
         <Animated variants={fadeMove("up", 40, 0.25)}>
           <Carousel
-            setApi={setApi}
+            ref={carouselRef}
             opts={{
               align: "start",
               loop: true,
@@ -131,22 +98,12 @@ function OpportunitiesSection() {
                 </CarouselItem>
               ))}
             </CarouselContent>
+            {/* Carousel controls centered at the bottom */}
+            {/* <div className="flex items-center justify-center gap-0 mt-12 relative">
+              <CarouselPrevious className="static translate-y-0 h-14 w-14 bg-primary text-white hover:bg-primary/90 rounded-full" />
+              <CarouselNext className="static translate-y-0 h-14 w-14 bg-primary text-white hover:bg-primary/90 rounded-full" />
+            </div> */}
           </Carousel>
-        </Animated>
-
-        <Animated variants={fadeMove("up", 20, 0.35)}>
-          <div className="flex justify-center gap-2 mt-8">
-            {Array.from({ length: count }).map((_, index) => (
-              <button
-                key={index}
-                onClick={() => api?.scrollTo(index)}
-                className={`h-2 rounded-full transition-all cursor-pointer ${
-                  current === index ? "w-8 bg-primary" : "w-2 bg-gray-300"
-                }`}
-                aria-label={`Slide ${index + 1}`}
-              />
-            ))}
-          </div>
         </Animated>
       </div>
     </section>

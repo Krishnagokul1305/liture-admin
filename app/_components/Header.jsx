@@ -1,9 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X, LogOut } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import logo from "@/public/LE-01.png";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -13,6 +17,10 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isOpportunitiesOpen, setIsOpportunitiesOpen] = useState(false);
+
+  const { data: session } = useSession();
+  const userName = session?.user?.name || "User";
+  const isToken = Boolean(session?.user);
 
   const navItems = [
     { id: 1, name: "Home", href: "home" },
@@ -65,9 +73,13 @@ const Header = () => {
     setIsMenuOpen(false);
   };
 
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.refresh();
+  };
+
   return (
     <>
-      {/* HEADER */}
       <header
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
           scrolled
@@ -89,7 +101,7 @@ const Header = () => {
             </a>
 
             {/* DESKTOP NAV */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden md:flex items-center space-x-8 flex-1 justify-center">
               {navItems.map((item) => (
                 <button
                   key={item.id}
@@ -142,6 +154,55 @@ const Header = () => {
                 </div>
               </div>
             </nav>
+
+            {/* DESKTOP AUTH */}
+            <div className="hidden md:flex items-center space-x-4">
+              {!isToken ? (
+                <>
+                  <button
+                    onClick={() => router.push("/login")}
+                    className={`px-4 py-2 font-medium transition-colors rounded-lg  bg-white/10 ${
+                      scrolled
+                        ? "text-gray-900 hover:bg-gray-100"
+                        : "text-white"
+                    }`}
+                  >
+                    Log In
+                  </button>
+                  <button
+                    onClick={() => router.push("/signup")}
+                    className="px-4 py-2 font-medium bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              ) : (
+                <div className="relative group">
+                  <button className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors">
+                    <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white text-sm font-bold">
+                      {userName.charAt(0)}
+                    </div>
+                    <span
+                      className={`font-medium ${
+                        scrolled ? "text-gray-900" : "text-white"
+                      }`}
+                    >
+                      {userName}
+                    </span>
+                  </button>
+
+                  <div className="absolute top-full right-0 mt-2 w-48 rounded-lg overflow-hidden bg-white border shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50/50 flex items-center gap-2 border-t"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Log Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Mobile Toggle */}
             <button
@@ -233,6 +294,56 @@ const Header = () => {
                       {link.name}
                     </button>
                   ))}
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Auth */}
+            <div className="pt-4 border-t">
+              {!isToken ? (
+                <div className="grid gap-3">
+                  <button
+                    onClick={() => {
+                      router.push("/login");
+                      setIsMenuOpen(false);
+                    }}
+                    className="px-4 py-3 text-gray-900 font-semibold border border-gray-300 rounded-xl hover:bg-white transition-all"
+                  >
+                    Log In
+                  </button>
+                  <button
+                    onClick={() => {
+                      router.push("/signup");
+                      setIsMenuOpen(false);
+                    }}
+                    className="px-4 py-3 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 shadow-md shadow-red-200 transition-all"
+                  >
+                    Sign Up
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 bg-white border rounded-lg">
+                    <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
+                      {userName.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900">{userName}</p>
+                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">
+                        Account Active
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={async () => {
+                      await handleLogout();
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-6 bg-primary"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </Button>
                 </div>
               )}
             </div>

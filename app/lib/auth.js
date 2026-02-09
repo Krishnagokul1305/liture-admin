@@ -41,13 +41,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             },
           );
 
-          const userData = await userRes.json();
+          const { data } = await userRes.json();
 
           if (!userRes.ok) throw new Error("Could not fetch user profile");
 
-          // 3. Return user object + tokens to be stored in the JWT
           return {
-            ...userData,
+            ...data,
             accessToken: tokens.access,
             refreshToken: tokens.refresh,
           };
@@ -61,7 +60,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   callbacks: {
     async jwt({ token, user }) {
-      // When user logs in, 'user' contains the object returned from authorize()
       if (user) {
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;

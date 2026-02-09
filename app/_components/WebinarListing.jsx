@@ -10,7 +10,13 @@ export default async function WebinarListing({ searchParams = {} }) {
 
   let webinars = [];
   try {
-    const res = await getAllWebinars({ search, page: 1, page_size: 100 });
+    const res = await getAllWebinars({
+      search,
+      page: 1,
+      is_active: true,
+      page_size: 100,
+      cache: true,
+    });
     webinars = res?.webinars || [];
   } catch (err) {
     console.error("Failed to load webinars:", err);

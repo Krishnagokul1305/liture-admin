@@ -9,7 +9,9 @@ import bcrypt from "bcryptjs";
 import {
   createUser,
   deleteUser,
+  forgotPassword,
   registerUser,
+  resetPassword,
   updateUser,
 } from "../../service/userService";
 import { revalidatePath } from "next/cache";
@@ -19,17 +21,20 @@ import {
   deleteInternship,
   deleteInternshipRegistration,
   updateInternship,
+  applyInternship,
 } from "@/service/internshipService";
 import {
   createWebinar,
   updateWebinar,
   deleteWebinar,
   deleteWebinarRegistration,
+  registerWebinar,
 } from "@/service/webinarService";
 import {
   createMembership,
   deleteMembership,
   updateMembership,
+  registerMembership,
 } from "@/service/membershipService";
 import { uploadImageToS3 } from "./s3";
 import {
@@ -78,53 +83,11 @@ export async function deleteUserAction(id) {
 }
 
 export async function forgotPasswordAction(email) {
-  await dbConnect();
-
-  const user = await userModel.findOne({ email });
-
-  if (!user) {
-    return true;
-  }
-
-  const resetToken = user.createPasswordResetToken();
-
-  await user.save({ validateBeforeSave: false });
-
-  const resetURL = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
-
-  await sendResetPasswordEmail(user.email, resetURL);
-
-  console.log("RESET URL:", resetURL);
-
-  return true;
+  await forgotPassword(email);
 }
 
-export async function resetPasswordAction(token, newPassword) {
-  await dbConnect();
-
-  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
-
-  const user = await userModel
-    .findOne({
-      passwordResetToken: hashedToken,
-      passwordResetExpires: { $gt: Date.now() },
-    })
-    .select("+password");
-
-  if (!user) {
-    throw new Error("Token is invalid or has expired");
-  }
-
-  const hashedPassword = await bcrypt.hash(newPassword, 12);
-
-  user.password = hashedPassword;
-
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
-
-  await user.save();
-
-  return true;
+export async function resetPasswordAction(data) {
+  await resetPassword(data);
 }
 
 export async function createInternshipAction(formData) {
@@ -206,9 +169,22 @@ export async function createMembershipRegistrationAction(data) {
   await createMembershipRegistration(data);
   revalidatePath("/registrations/memberships");
 }
-/* ============================
-   REGISTRATION STATUS CHANGES
-============================ */
+
+export async function webinarregistrationaction(data) {
+  const response = await registerWebinar(data);
+  return response;
+}
+
+export async function internshipregistrationaction(formData) {
+  const response = await applyInternship(formData);
+  return response;
+}
+
+export async function membershipregistrationaction(data) {
+  const response = await registerMembership(data);
+  return response;
+}
+
 export async function changeWebinarRegistrationStatus(
   registrationId,
   status,

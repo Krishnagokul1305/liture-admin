@@ -92,7 +92,7 @@ export default function WebinarForm({
         });
       }
 
-      router.push("/webinars");
+      router.push("/admin/webinars");
     } catch (err) {
       console.error(err);
     }

@@ -12,6 +12,7 @@ export async function getAllWebinars({
   time,
   page = 1,
   page_size = 10,
+  cache = false,
 } = {}) {
   const params = new URLSearchParams();
 
@@ -32,12 +33,15 @@ export async function getAllWebinars({
 
   const res = await fetch(
     `${API_BASE_URL}/webinars/list/?${params.toString()}`,
+    { next: cache ? { revalidate: 60 } : { cache: "no-store" } },
     {
       headers: {
         "Content-Type": "application/json",
       },
     },
   );
+
+  console.log("webinar fetched");
 
   const data = await res.json();
   const webinars = data?.results || [];
@@ -250,4 +254,21 @@ export async function deleteWebinarRegistration(registrationId) {
   }
 
   return response.status === 204; // Returns true on success
+}
+
+export async function registerWebinar({ webinar_id, reason }) {
+  const session = await auth();
+  const res = await fetch(`${API_BASE_URL}/webinars/registrations/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session?.accessToken}`,
+    },
+    body: JSON.stringify({ webinar_id, reason, user_id: session?.user?.id }),
+  });
+
+  const data = await res.json();
+  if (!res.ok)
+    throw new Error(data?.error || data?.detail || JSON.stringify(data));
+  return data;
 }

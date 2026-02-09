@@ -94,7 +94,7 @@ export default function InternshipForm({
         });
       }
 
-      router.push("/internships");
+      router.push("/admin/internships");
     } catch (err) {
       console.error(err);
     }

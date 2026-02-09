@@ -8,7 +8,13 @@ export default async function IntershipListing({ searchParams = {} }) {
   const search = (searchParams?.search || "").toString();
   let internships = [];
   try {
-    const res = await getAllInternships({ search, page: 1, limit: 100 });
+    const res = await getAllInternships({
+      search,
+      page: 1,
+      limit: 100,
+      cache: true,
+      is_active: true,
+    });
     internships = res?.internships || [];
   } catch (err) {
     console.error("Failed to load internships:", err);

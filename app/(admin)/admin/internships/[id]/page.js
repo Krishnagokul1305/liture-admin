@@ -24,7 +24,7 @@ export default async function Page({ params, searchParams }) {
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
       <Link
-        href="/internships"
+        href="/admin/internships"
         className="inline-flex text-sm items-center text-primary font-medium mb-6 transition"
       >
         ← Back

@@ -1,8 +1,6 @@
-// import { Button } from "@/components/ui/button";
-// import WebinarRegistrationForm from "./forms/WebinarRegistrationForm";
-// import Modal from "./Modal";
-
+import { Button } from "@/components/ui/button";
 import WebinarRegistrationForm from "./forms/WebinarRegistrationForm";
+import Modal from "./Modal";
 
 export default function WebinarCard({ webinar }) {
   return (

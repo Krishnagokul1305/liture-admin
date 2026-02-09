@@ -5,7 +5,7 @@ function page() {
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
       <Link
-        href="/webinars"
+        href="/admin/webinars"
         className="inline-flex text-sm items-center text-primary font-medium mb-6 transition"
       >
         ← Back

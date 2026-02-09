@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useTransition } from "react";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -13,105 +14,50 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-// import Spinner from "../Spinner";
-// import { useRegisterWebinar } from "../../hooks/useRegisterWebinar";
-/* ✅ SAME STRUCTURE, webinar-specific field */
+import { webinarregistrationaction } from "@/app/lib/action";
+
 const webinarFormSchema = z.object({
-  fullName: z.string().min(2, "Full name is required"),
-  email: z.string().email("Enter a valid email"),
-  phoneNumber: z.string().min(10, "Enter a valid phone number").max(15),
+  webinar_id: z.number().min(1),
   reason: z.string().min(10, "Please explain briefly"),
-  webinar: z.string().min(1, "Select a webinar"),
 });
 
 export default function WebinarRegistrationForm({ webinarId, close }) {
-  // const { register, submitting } = useRegisterWebinar();
-
+  const [isPending, startTransition] = useTransition();
   const form = useForm({
     resolver: zodResolver(webinarFormSchema),
     defaultValues: {
-      fullName: "",
-      email: "",
-      phoneNumber: "",
       reason: "",
-      webinar: webinarId,
+      webinar_id: webinarId,
     },
   });
 
   const onSubmit = (values) => {
-    // register(values, {
-    //   onSuccess: () => {
-    //     toast.success("Webinar registration successful");
-    //     close?.();
-    //     form.reset({
-    //       ...form.getValues(),
-    //       fullName: "",
-    //       email: "",
-    //       phoneNumber: "",
-    //       reason: "",
-    //     });
-    //   },
-    //   onError: (err) => {
-    //     toast.error(err.message);
-    //   },
-    // });
+    startTransition(async () => {
+      try {
+        await webinarregistrationaction(values);
+        toast.success("Webinar registration successful");
+        close?.();
+        form.reset({ reason: "", webinar_id: webinarId });
+      } catch (err) {
+        toast.error(err?.message || "Registration failed");
+      }
+    });
   };
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onSubmit, (errors) => console.log(errors))}
         className="space-y-5 max-w-lg"
       >
-        {/* Full Name */}
         <FormField
           control={form.control}
-          name="fullName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Full Name</FormLabel>
-              <FormControl>
-                <Input placeholder="John Doe" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          name="webinar_id"
+          render={({ field }) => <input type="hidden" {...field} />}
         />
 
-        {/* Email */}
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="john@email.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Phone */}
-        <FormField
-          control={form.control}
-          name="phoneNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone Number</FormLabel>
-              <FormControl>
-                <Input placeholder="9876543210" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Reason */}
         <FormField
           control={form.control}
           name="reason"
@@ -130,8 +76,8 @@ export default function WebinarRegistrationForm({ webinarId, close }) {
           )}
         />
 
-        <Button type="submit" className="w-full">
-          {submitting ? <Spinner size={20} /> : "Register Now"}apply
+        <Button type="submit" className="w-full" disabled={isPending}>
+          {isPending ? "Registering..." : "Register Now"}
         </Button>
       </form>
     </Form>
