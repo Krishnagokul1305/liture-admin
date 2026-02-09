@@ -13,6 +13,7 @@ import {
   registerUser,
   resetPassword,
   updateUser,
+  verifyEmail,
 } from "../../service/userService";
 import { revalidatePath } from "next/cache";
 import userModel from "./model/user.model";
@@ -222,4 +223,8 @@ export async function changeMembershipRegistrationStatus(
   revalidatePath("/registrations/memberships");
   revalidatePath(`/registrations/memberships/${registrationId}`);
   return response;
+}
+
+export async function verifyEmailAction(token) {
+  await verifyEmail(token);
 }

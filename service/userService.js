@@ -164,3 +164,18 @@ export async function resetPassword({ token, newPassword }) {
 
   return res.json();
 }
+
+export async function verifyEmail(token) {
+  const res = await fetch(`${API_BASE_URL}/auth/verify-email/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ verification_token: token }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Verification failed");
+  }
+
+  return res.json();
+}
