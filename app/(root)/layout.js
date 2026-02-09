@@ -1,4 +1,5 @@
 import Header from "../_components/Header";
+import { myFont } from "../font";
 
 export const metadata = {
   title: "Liture EdTech — Learning & Careers",
@@ -8,7 +9,7 @@ export const metadata = {
 
 export default function Layout({ children }) {
   return (
-    <div>
+    <div className={`${myFont.variable} app`}>
       <Header />
       {children}
     </div>

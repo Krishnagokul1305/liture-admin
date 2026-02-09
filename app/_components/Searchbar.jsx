@@ -2,6 +2,8 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 function Searchbar() {
   const searchParams = useSearchParams();
@@ -23,13 +25,16 @@ function Searchbar() {
   };
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center gap-2 w-full">
       <Input
         placeholder="Search..."
         value={searchFilter}
         onChange={handleSearch}
         className="max-w-sm"
       />
+      <Button className="h-10 w-10 rounded-lg" type="button">
+        <Search className="h-5 w-5 text-white" />
+      </Button>
     </div>
   );
 }
