@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-export default function TablePagination({ pagination }) {
+export default function TablePagination({ pagination, border = true }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -34,7 +34,9 @@ export default function TablePagination({ pagination }) {
   const endRecord = Math.min(currentPage * pageSize, total);
 
   return (
-    <div className="flex items-center justify-between py-3 px-4 border-t text-sm">
+    <div
+      className={`flex items-center justify-between py-3 px-4 ${border && "border-t"} text-sm`}
+    >
       <div className="text-muted-foreground">
         Showing {startRecord} to {endRecord} of {total} results
       </div>
