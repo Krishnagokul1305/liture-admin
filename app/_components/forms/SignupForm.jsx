@@ -34,10 +34,10 @@ function SignupForm({ className, ...props }) {
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
-      email: "frontend@gmail.com",
-      name: "frontend",
-      password: "gokul2005$.",
-      phone_number: "9876543210",
+      email: "",
+      name: "",
+      password: "",
+      phone_number: "",
     },
     resolver: zodResolver(customSignupSchema),
   });
