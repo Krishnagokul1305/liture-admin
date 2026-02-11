@@ -103,17 +103,6 @@ export async function getAllMembershipsOptions() {
 /**
  * READ ONE
  */
-export async function getMembershipById(id) {
-  const session = await auth();
-  const res = await fetch(`${API_BASE_URL}/memberships/list/${id}/`, {
-    headers: {
-      Authorization: `Bearer ${session?.accessToken}`,
-      "Content-Type": "application/json",
-    },
-  });
-  const data = await res.json();
-  return data;
-}
 
 export async function getMembershipRegistrationById(id) {
   const session = await auth();
@@ -152,17 +141,6 @@ export async function getMembershipRegistrationById(id) {
 /**
  * READ BY NAME (optional helper)
  */
-export async function getMembershipByName(name) {
-  const session = await auth();
-  const res = await fetch(`${API_BASE_URL}/memberships/list/?name=${name}`, {
-    headers: {
-      Authorization: `Bearer ${session?.accessToken}`,
-      "Content-Type": "application/json",
-    },
-  });
-  const data = await res.json();
-  return data?.results?.[0] || null;
-}
 
 /**
  * UPDATE
@@ -204,28 +182,6 @@ export async function deleteMembership(id) {
   }
 
   return res.ok;
-}
-
-/**
- * SOFT DELETE (recommended)
- */
-export async function deactivateMembership(id) {
-  const session = await auth();
-  const res = await fetch(`${API_BASE_URL}/memberships/list/${id}/`, {
-    method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${session?.accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ isActive: false }),
-  });
-  const response = await res.json();
-
-  if (!res.ok) {
-    throw response;
-  }
-
-  return response;
 }
 
 export async function deleteMembershipRegistration(registrationId) {

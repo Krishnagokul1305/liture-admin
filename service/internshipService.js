@@ -95,7 +95,7 @@ export async function getAllInternshipRegistrations({
       registered_at: formatDate(reg.applied_at),
       attended: reg.attended,
       status: reg.status,
-      reason: reg.reason,
+      reason: reg.reason || "No reason",
       resume: reg.resume || null,
     })),
     pagination: {

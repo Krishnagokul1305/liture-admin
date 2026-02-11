@@ -25,18 +25,6 @@ export async function getAllUsers() {
   };
 }
 
-export async function getUserById(id) {
-  const session = await auth();
-  const res = await fetch(`${API_BASE_URL}/users/${id}/`, {
-    headers: {
-      Authorization: `Bearer ${session?.accessToken}`,
-      "Content-Type": "application/json",
-    },
-  });
-  const { data } = await res.json();
-  return data;
-}
-
 export async function getCurrentUser() {
   const session = await auth();
   const res = await fetch(`${API_BASE_URL}/users/me/`, {
@@ -178,4 +166,20 @@ export async function verifyEmail(token) {
   }
 
   return res.json();
+}
+
+export async function contactservice(data) {
+  const res = await fetch(`${API_BASE_URL}/users/contact/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  const response = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    throw new Error(response?.message || "Failed to submit contact form");
+  }
+
+  return response;
 }

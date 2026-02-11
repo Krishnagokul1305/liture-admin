@@ -39,6 +39,4 @@ const activities = [
   },
 ];
 
-const API_BASE = "https://liture-admin.vercel.app/api";
-
-export { activities, API_BASE };
+export { activities };

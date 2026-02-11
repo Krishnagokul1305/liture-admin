@@ -1,13 +1,10 @@
 "use server";
 
-import { signIn, signOut } from "./auth";
-import dbConnect from "./db";
-import { sendResetPasswordEmail, sendWelcomeEmail } from "./email";
-import crypto from "crypto";
-import bcrypt from "bcryptjs";
+import { signOut } from "./auth";
 
 import {
   createUser,
+  contactservice,
   deleteUser,
   forgotPassword,
   registerUser,
@@ -16,7 +13,6 @@ import {
   verifyEmail,
 } from "../../service/userService";
 import { revalidatePath } from "next/cache";
-import userModel from "./model/user.model";
 import {
   createInternship,
   deleteInternship,
@@ -34,28 +30,10 @@ import {
 import {
   createMembership,
   deleteMembership,
+  deleteMembershipRegistration,
   updateMembership,
   registerMembership,
 } from "@/service/membershipService";
-import { uploadImageToS3 } from "./s3";
-import {
-  createRegistration,
-  deleteRegistration,
-  updateRegistration,
-} from "@/service/registrationService";
-import {
-  createMembershipRegistration,
-  deleteMembershipRegistration,
-  updateMembershipRegistration,
-} from "@/service/membershipRegistrationService";
-
-export async function signInAction(data) {
-  await signIn("credentials", {
-    email: data.email,
-    password: data.password,
-    redirectTo: "/",
-  });
-}
 
 export async function signOutAction() {
   await signOut();
@@ -89,6 +67,11 @@ export async function forgotPasswordAction(email) {
 
 export async function resetPasswordAction(data) {
   await resetPassword(data);
+}
+
+export async function contactAction(data) {
+  const response = await contactservice(data);
+  return response;
 }
 
 export async function createInternshipAction(formData) {
@@ -136,21 +119,6 @@ export async function updateMembershipAction(id, data) {
   revalidatePath("/membership");
 }
 
-export async function createRegistrationAction(data) {
-  await createRegistration(data);
-  revalidatePath(`/registrations/${data?.type}s`);
-}
-
-export async function deleteRegistrationAction(id, type) {
-  await deleteRegistration(id);
-  revalidatePath(`/registrations/${type}`);
-}
-
-export async function updateRegistrationAction(id, data, type) {
-  await updateRegistration(id, data);
-  revalidatePath(`/registrations/${type}s`);
-}
-
 export async function deleteMembershipRegistrationAction(id) {
   await deleteMembershipRegistration(id);
   revalidatePath("/registrations/memberships");
@@ -164,11 +132,6 @@ export async function deleteInternshipRegistrationAction(id) {
 export async function deleteWebinarRegistrationAction(id) {
   await deleteWebinarRegistration(id);
   revalidatePath("/registrations/webinars");
-}
-
-export async function createMembershipRegistrationAction(data) {
-  await createMembershipRegistration(data);
-  revalidatePath("/registrations/memberships");
 }
 
 export async function webinarregistrationaction(data) {

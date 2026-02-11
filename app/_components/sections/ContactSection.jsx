@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { Animated } from "../Animated";
 import { fadeMove, container } from "@/app/utils/animations";
-import { API_BASE } from "@/service/constantservice";
 import { toast } from "sonner";
+import { contactAction } from "@/app/lib/action";
 
 function ContactSection() {
   const {
@@ -27,24 +27,12 @@ function ContactSection() {
 
   const onSubmit = async (data) => {
     try {
-      const res = await fetch(`${API_BASE}/contact`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result = await res.json();
-
-      if (!result.success) {
-        throw new Error(result.message);
-      }
+      await contactAction(data);
       toast.success("Message sent successfully ✅");
       reset();
     } catch (err) {
       console.error(err);
-      toast.error("Something went wrong");
+      toast.error(err?.message || "Something went wrong");
     }
   };
 
