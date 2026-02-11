@@ -1,6 +1,5 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
-import ThemeProvider from "@/components/ThemeProvider";
 import { Toaster } from "sonner";
 import QueryProvider from "@/components/QueryProvider";
 import { SessionProvider } from "next-auth/react";
@@ -25,7 +24,7 @@ export default function RootLayout({ children }) {
         <QueryProvider>
           <SessionProvider>
             <Toaster position="top-center" />
-            <ThemeProvider>{children}</ThemeProvider>
+            <div>{children}</div>
           </SessionProvider>
         </QueryProvider>
       </body>
