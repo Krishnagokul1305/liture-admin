@@ -7,11 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import UsersTable from "@/app/_components/tables/UsersTable";
 import { getAllUsers, getCurrentUserStatus } from "@/service/userService";
+import { redirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 async function page({ searchParams }) {
   const { isAdmin } = await getCurrentUserStatus();
   if (!isAdmin) {
-    throw new Error("Unauthorized");
+    redirect("/login");
   }
   const params = await searchParams;
   const data = await getAllUsers(params);

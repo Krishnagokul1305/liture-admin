@@ -9,9 +9,6 @@ import { getAllWebinars } from "@/service/webinarService";
 
 async function page({ searchParams }) {
   const { isAdmin, isStaff } = await getCurrentUserStatus();
-  if (!isAdmin && !isStaff) {
-    throw new Error("Unauthorized");
-  }
   const params = await searchParams;
   const data = await getAllWebinars(params);
   return (

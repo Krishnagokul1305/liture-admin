@@ -7,8 +7,16 @@ import RecentRegistrationsTable from "@/app/_components/dashboard/RecentRegistra
 import TableSkeleton from "@/app/_components/dashboard/TableSkeleton";
 import ChartPieSkeleton from "@/app/_components/dashboard/ChartPieSkeleton";
 import ChartPieWrapper from "@/app/_components/dashboard/ChartPieWrapper";
+import { getCurrentUserStatus } from "@/service/userService";
+import { redirect } from "next/navigation";
 
-function page() {
+export const dynamic = "force-dynamic";
+
+async function page() {
+  const { isAdmin, isStaff } = await getCurrentUserStatus();
+  if (!isAdmin && !isStaff) {
+    redirect("/login");
+  }
   return (
     <div className="flex flex-1 flex-col gap-4 pt-0">
       <Suspense fallback={<DashboardStatsSkeleton />}>

@@ -7,6 +7,10 @@ import {
 import { AppSidebar } from "@/app/_components/AppSidebar";
 import DynamicBreadcrumb from "@/app/_components/DynamicBreadcrumb";
 import ThemeToggler from "@/components/ThemeToggler";
+import { getCurrentUserStatus } from "@/service/userService";
+import { redirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Liture Edutech | Admin",
@@ -14,7 +18,12 @@ export const metadata = {
     "Liture EdTech Admin Dashboard provides centralized control to manage users, roles, content, and platform operations efficiently.",
 };
 
-export default function Layout({ children }) {
+export default async function Layout({ children }) {
+  const { isAdmin, isStaff } = await getCurrentUserStatus();
+  if (!isAdmin && !isStaff) {
+    redirect("/login");
+  }
+
   return (
     <div>
       <SidebarProvider>

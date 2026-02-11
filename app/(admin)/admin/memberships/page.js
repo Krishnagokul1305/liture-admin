@@ -9,9 +9,6 @@ import { getAllMemberships } from "@/service/membershipService";
 
 async function page({ searchParams }) {
   const { isAdmin, isStaff } = await getCurrentUserStatus();
-  if (!isAdmin && !isStaff) {
-    throw new Error("Unauthorized");
-  }
   const param = await searchParams;
   const data = await getAllMemberships(param);
 

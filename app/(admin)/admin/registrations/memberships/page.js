@@ -7,9 +7,6 @@ import StatusFilter from "@/app/_components/StatusFilter";
 
 async function page({ searchParams }) {
   const { isAdmin, isStaff } = await getCurrentUserStatus();
-  if (!isAdmin && !isStaff) {
-    throw new Error("Unauthorized");
-  }
   const searchs = await searchParams;
   const data = await getAllMembershipRegistrations(searchs);
   return (

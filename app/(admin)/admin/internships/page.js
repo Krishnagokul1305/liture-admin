@@ -9,9 +9,6 @@ import InternshipTable from "@/app/_components/tables/InternshipTable";
 
 async function page({ searchParams }) {
   const { isAdmin, isStaff } = await getCurrentUserStatus();
-  if (!isAdmin && !isStaff) {
-    throw new Error("Unauthorized");
-  }
   const params = await searchParams;
   const data = await getAllInternships(params);
   return (
