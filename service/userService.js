@@ -1,4 +1,5 @@
 import { auth } from "@/app/lib/auth";
+import { sendContactFormEmail } from "@/app/lib/email";
 
 const API_BASE_URL = process.env.DJANGO_API_URL;
 
@@ -142,11 +143,16 @@ export async function resetPassword({ token, newPassword }) {
   const res = await fetch(`${API_BASE_URL}/auth/reset-password/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token, new_password: newPassword }),
+    body: JSON.stringify({
+      reset_token: token,
+      new_password: newPassword,
+      confirm_new_password: newPassword,
+    }),
   });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    console.log(err, res);
     throw new Error(err.detail || "Failed to reset password");
   }
 
@@ -169,17 +175,21 @@ export async function verifyEmail(token) {
 }
 
 export async function contactservice(data) {
-  const res = await fetch(`${API_BASE_URL}/users/contact/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  // NOTE: API functionality disabled per request.
+  // const res = await fetch(`${API_BASE_URL}/users/contact/`, {
+  //   method: "POST",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify(data),
+  // });
+  //
+  // const response = await res.json().catch(() => ({}));
+  //
+  // if (!res.ok) {
+  //   throw new Error(response?.message || "Failed to submit contact form");
+  // }
+  //
+  // return response;
 
-  const response = await res.json().catch(() => ({}));
-
-  if (!res.ok) {
-    throw new Error(response?.message || "Failed to submit contact form");
-  }
-
-  return response;
+  await sendContactFormEmail(data);
+  return { success: true };
 }

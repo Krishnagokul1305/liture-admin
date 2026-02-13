@@ -1,26 +1,38 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const smtpHost = process.env.EMAIL_HOST || "smtp.gmail.com";
+const smtpPort = Number(process.env.EMAIL_PORT || 465);
+const smtpUser = process.env.EMAIL_HOST_USER;
+const smtpPass = process.env.EMAIL_HOST_PASSWORD;
+
+const transporter = nodemailer.createTransport({
+  host: smtpHost,
+  port: smtpPort,
+  secure: smtpPort === 465,
+  auth: {
+    user: smtpUser,
+    pass: smtpPass,
+  },
+});
 
 /**
  * Generic email sender
  */
 export const sendEmail = async ({ to, subject, html }) => {
   try {
-    console.log(process.env.EMAIL_FROM);
-    const { data, error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM,
+    if (!smtpUser || !smtpPass) {
+      throw new Error("Missing EMAIL_HOST_USER or EMAIL_HOST_PASSWORD");
+    }
+
+    const from = process.env.EMAIL_FROM || smtpUser;
+    const info = await transporter.sendMail({
+      from,
       to,
       subject,
       html,
     });
 
-    if (error) {
-      console.error("Resend Error:", error);
-      throw new Error("Failed to send email");
-    }
-
-    return data;
+    return info;
   } catch (err) {
     console.error("Email send failed:", err);
     throw err;
@@ -168,4 +180,105 @@ export const sendWelcomeEmail = async (to, name) => {
   });
 
   console.log("✅ Welcome email sent");
+};
+
+export function contactFormEmailTemplate({ name, email, phone, message }) {
+  return `<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      }
+      .header {
+        background-color: #d32f2f;
+        color: #ffffff;
+        padding: 25px;
+        text-align: center;
+      }
+      .content {
+        padding: 30px;
+        background-color: #ffffff;
+      }
+      .field-label {
+        font-weight: bold;
+        color: #d32f2f;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 1.2px;
+        margin-bottom: 5px;
+      }
+      .field-value {
+        margin-bottom: 25px;
+        padding: 12px;
+        background-color: #fff5f5;
+        border-radius: 6px;
+        border-left: 4px solid #d32f2f;
+        font-size: 15px;
+      }
+      .footer {
+        background-color: #f9f9f9;
+        color: #999;
+        text-align: center;
+        padding: 20px;
+        font-size: 12px;
+        border-top: 1px solid #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1 style="margin: 0; font-size: 24px">New Message Received</h1>
+      </div>
+      <div class="content">
+        <div class="field-label">Sender Name</div>
+        <div class="field-value"><strong>${name ?? "-"}</strong></div>
+
+        <div class="field-label">Email Address</div>
+        <div class="field-value">${email ?? "-"}</div>
+
+        <div class="field-label">Phone Number</div>
+        <div class="field-value">${phone ?? "-"}</div>
+
+        <div class="field-label">Message Content</div>
+        <div style="white-space: pre-wrap" class="field-value">${
+          message ?? "-"
+        }</div>
+      </div>
+      <div class="footer">
+        Sent via Website Contact Form &bull; System Notification
+      </div>
+    </div>
+  </body>
+</html>
+`;
+}
+
+export const sendContactFormEmail = async ({ name, email, phone, message }) => {
+  const subject = "New Contact Form Message";
+  const html = contactFormEmailTemplate({ name, email, phone, message });
+  const to = smtpUser;
+
+  await sendEmail({
+    to,
+    subject,
+    html,
+  });
+
+  console.log("✅ Contact form email sent");
 };

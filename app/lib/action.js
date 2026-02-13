@@ -62,7 +62,7 @@ export async function deleteUserAction(id) {
 }
 
 export async function forgotPasswordAction(email) {
-  await forgotPassword(email);
+  return await forgotPassword(email);
 }
 
 export async function resetPasswordAction(data) {
