@@ -46,73 +46,154 @@ export const sendEmail = async ({ to, subject, html }) => {
 export function resetPasswordEmailTemplate({
   resetUrl,
   email,
-  expiresIn = 10,
+  expiresInHours = 24,
 }) {
-  return `
-  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Fira Sans','Droid Sans','Helvetica Neue',sans-serif;
-              background-color:#ffffff; color:#1f2937; line-height:1.6;">
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Password Reset Request</title>
+    <style>
+      table,
+      td {
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+      img {
+        -ms-interpolation-mode: bicubic;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100% !important;
+      }
+    </style>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #ffffff;
+      font-family:
+        -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+        Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans',
+        'Helvetica Neue', sans-serif;
+      color: #1f2937;
+      line-height: 1.6;
+    "
+  >
+    <div style="width: 100%; background-color: #ffffff">
+      <div
+        style="
+          background-color: #0f172a;
+          padding: 48px 40px;
+          text-align: center;
+        "
+      >
+        <div style="max-width: 600px; margin: 0 auto">
+          <p
+            style="
+              margin: 0 0 16px 0;
+              font-size: 12px;
+              font-weight: 600;
+              color: #94a3b8;
+              text-transform: uppercase;
+              letter-spacing: 1px;
+            "
+          >
+            Security Alert
+          </p>
+          <h1
+            style="
+              margin: 0 0 8px 0;
+              font-size: 28px;
+              font-weight: 700;
+              color: #ffffff;
+            "
+          >
+            Password Reset Request
+          </h1>
+          <p style="margin: 0; font-size: 15px; color: #cbd5e1">
+            We received a request to reset your password. Click the button below
+            to proceed.
+          </p>
+        </div>
+      </div>
 
-    <!-- Header -->
-    <div style="background-color:#0f172a; padding:48px 40px; text-align:center;">
-      <div style="max-width:600px; margin:0 auto;">
-        <p style="margin:0 0 16px 0; font-size:12px; font-weight:600; color:#94a3b8; text-transform:uppercase; letter-spacing:1px;">
-          Security Alert
+      <div style="max-width: 600px; margin: 0 auto; padding: 48px 40px">
+        <div style="margin-bottom: 48px; text-align: center">
+          <a
+            href="${resetUrl}"
+            style="
+              display: inline-block;
+              background-color: #2563eb;
+              color: #ffffff;
+              padding: 14px 32px;
+              text-decoration: none;
+              border-radius: 8px;
+              font-weight: 600;
+              font-size: 16px;
+            "
+          >
+            Reset Your Password
+          </a>
+        </div>
+
+        <div
+          style="
+            background-color: #f0f9ff;
+            border: 1px solid #e0f2fe;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 32px;
+          "
+        >
+          <p style="margin: 0; font-size: 14px; color: #0c4a6e">
+            This reset link is associated with: <b>${email}</b><br />
+            It will expire in <b>${expiresInHours} hours</b>.
+          </p>
+        </div>
+
+        <div
+          style="
+            background-color: #fef2f2;
+            border: 1px solid #fee2e2;
+            border-radius: 8px;
+            padding: 20px;
+          "
+        >
+          <p style="margin: 0; font-size: 14px; color: #7f1d1d">
+            <strong>Didn't request this?</strong> If you didn't ask to reset
+            your password, please ignore this email. Your account remains
+            secure.
+          </p>
+        </div>
+      </div>
+
+      <div
+        style="
+          max-width: 600px;
+          margin: 0 auto;
+          padding: 32px 40px;
+          text-align: center;
+          font-size: 12px;
+          color: #9ca3af;
+          border-top: 1px solid #e5e7eb;
+        "
+      >
+        <p style="margin: 0 0 6px 0">
+          This is an automated security email from Liture Auth.
         </p>
-        <h1 style="margin:0 0 8px 0; font-size:28px; font-weight:700; color:#ffffff;">
-          Password Reset Request
-        </h1>
-        <p style="margin:0; font-size:15px; color:#cbd5e1;">
-          We received a request to reset your password. Click the button below to proceed.
+        <p style="margin: 0">
+          &copy; ${new Date().getFullYear()} Liture Auth Team. All rights reserved.
         </p>
       </div>
     </div>
-
-    <!-- Main Content -->
-    <div style="max-width:600px; margin:0 auto; padding:48px 40px;">
-
-      <!-- CTA -->
-      <div style="margin-bottom:48px; text-align:center;">
-        <a href="${resetUrl}"
-           style="display:inline-block; background-color:#2563eb; color:#ffffff;
-                  padding:14px 32px; text-decoration:none; border-radius:8px;
-                  font-weight:600; font-size:16px;">
-          Reset Your Password
-        </a>
-      </div>
-
-      <!-- Info -->
-      <div style="background-color:#f0f9ff; border:1px solid #e0f2fe;
-                  border-radius:8px; padding:24px; margin-bottom:32px;">
-        <p style="margin:0; font-size:14px; color:#0c4a6e;">
-          This reset link is associated with: <b>${email}</b><br/>
-          It will expire in <b>${expiresIn} minutes</b>.
-        </p>
-      </div>
-
-      <!-- Security Notice -->
-      <div style="background-color:#fef2f2; border:1px solid #fee2e2;
-                  border-radius:8px; padding:20px;">
-        <p style="margin:0; font-size:14px; color:#7f1d1d;">
-          <strong>Didn't request this?</strong> If you didn't ask to reset your password,
-          please ignore this email. Your account remains secure.
-        </p>
-      </div>
-
-    </div>
-
-    <!-- Footer -->
-    <div style="max-width:600px; margin:0 auto; padding:32px 40px; text-align:center;
-                font-size:12px; color:#9ca3af; border-top:1px solid #e5e7eb;">
-      <p style="margin:0 0 6px 0;">
-        This is an automated security email from Liture Auth.
-      </p>
-      <p style="margin:0;">
-        © ${new Date().getFullYear()} Liture Auth Team. All rights reserved.
-      </p>
-    </div>
-
-  </div>
-  `;
+  </body>
+</html>
+`;
 }
 
 export const sendResetPasswordEmail = async (to, resetUrl) => {
@@ -121,7 +202,7 @@ export const sendResetPasswordEmail = async (to, resetUrl) => {
   const html = resetPasswordEmailTemplate({
     resetUrl,
     email: to,
-    expiresIn: 10,
+    expiresInHours: 24,
   });
 
   await sendEmail({

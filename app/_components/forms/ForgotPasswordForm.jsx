@@ -8,14 +8,12 @@ import { toast } from "sonner";
 import * as z from "zod";
 import InputField from "../InputField";
 import { forgotPasswordAction } from "@/app/lib/action";
-import { useRouter } from "next/navigation";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Enter a valid email"),
 });
 
 export function ForgotPasswordForm({ className, ...props }) {
-  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -27,16 +25,12 @@ export function ForgotPasswordForm({ className, ...props }) {
   const onSubmit = async (data) => {
     toast.promise(
       (async () => {
-        const { token } = await forgotPasswordAction(data.email);
-        console.log(token);
-        if (token) {
-          router.push(`/reset-password?token=${encodeURIComponent(token)}`);
-        }
-        return token;
+        await forgotPasswordAction(data.email);
+        return true;
       })(),
       {
         loading: "Sending reset link...",
-        success: "Redirecting to reset link!",
+        success: "Reset link sent to your email",
         error: "Error sending the link",
       },
     );

@@ -1,5 +1,5 @@
 import { auth } from "@/app/lib/auth";
-import { sendContactFormEmail } from "@/app/lib/email";
+import { sendContactFormEmail, sendResetPasswordEmail } from "@/app/lib/email";
 
 const API_BASE_URL = process.env.DJANGO_API_URL;
 
@@ -136,7 +136,23 @@ export async function forgotPassword(email) {
     throw new Error(err.detail || "Failed to request password reset");
   }
 
-  return res.json();
+  const response = await res.json();
+  const token = response?.token;
+
+  if (!token) {
+    throw new Error("Reset token missing from response");
+  }
+
+  const frontendUrl = process.env.FRONTEND_URL;
+  if (!frontendUrl) {
+    throw new Error("Missing FRONTEND_URL env variable");
+  }
+
+  const resetUrl = `${frontendUrl.replace(/\/$/, "")}/reset-password?token=${encodeURIComponent(token)}`;
+
+  await sendResetPasswordEmail(email, resetUrl);
+
+  return { ok: true };
 }
 
 export async function resetPassword({ token, newPassword }) {
@@ -152,7 +168,6 @@ export async function resetPassword({ token, newPassword }) {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    console.log(err, res);
     throw new Error(err.detail || "Failed to reset password");
   }
 
