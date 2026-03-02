@@ -37,14 +37,14 @@ export default function MembershipRegistrationForm({ membershipId, close }) {
 
   const onSubmit = (values) => {
     startTransition(async () => {
-      try {
-        await membershipregistrationaction(values);
-        toast.success("Registered successfully");
-        close?.();
-        form.reset({ reason: "", membership_id: membershipId });
-      } catch (err) {
-        toast.error(err?.message || "Registration failed");
+      const result = await membershipregistrationaction(values);
+      if (result?.error) {
+        toast.error(result.error);
+        return;
       }
+      toast.success("Registered successfully");
+      close?.();
+      form.reset({ reason: "", membership_id: membershipId });
     });
   };
 

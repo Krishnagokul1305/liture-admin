@@ -15,12 +15,12 @@ export default async function Page({ params }) {
 
   const handleApprove = async () => {
     "use server";
-    await changeInternshipRegistrationStatus(id, "accepted");
+    return await changeInternshipRegistrationStatus(id, "accepted");
   };
 
   const handleReject = async (reason) => {
     "use server";
-    await changeInternshipRegistrationStatus(id, "rejected", reason);
+    return await changeInternshipRegistrationStatus(id, "rejected", reason);
   };
 
   return (

@@ -33,17 +33,21 @@ export function ResetPasswordForm({ token }) {
   });
 
   const onSubmit = async (data) => {
-    try {
-      if (!token) {
-        toast.error("Invalid or expired reset link");
-        return;
-      }
-      await resetPasswordAction({ token, newPassword: data.password });
-      toast.success("Password reset successful");
-      router.push("/login");
-    } catch (error) {
-      toast.error(error.message || "Failed to reset password");
+    if (!token) {
+      toast.error("Invalid or expired reset link");
+      return;
     }
+    const result = await resetPasswordAction({
+      token,
+      newPassword: data.password,
+    });
+
+    if (result?.error) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success("Password reset successful");
+    router.push("/login");
   };
 
   return (

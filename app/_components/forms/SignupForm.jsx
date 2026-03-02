@@ -45,47 +45,27 @@ function SignupForm({ className, ...props }) {
   const router = useRouter();
 
   const onSubmit = async (data) => {
-    try {
-      await signupUserAction(data);
-      toast.success("Account created successfully");
-      router.push("/login");
-    } catch (error) {
-      // Ignore Next.js redirect errors
-      if (error?.digest?.startsWith("NEXT_REDIRECT")) return;
-      let serverErrors = null;
+    const result = await signupUserAction(data);
 
-      // Case 1: error object already has errors (non–server-action case)
-      if (error && typeof error === "object" && "errors" in error) {
-        serverErrors = error.errors;
-      } else {
-        // Case 2: error.message contains JSON string
-        try {
-          const maybeString =
-            typeof error === "string"
-              ? error
-              : typeof error?.message === "string"
-                ? error.message
-                : "";
-
-          const parsed = JSON.parse(maybeString);
-          serverErrors = parsed?.errors ?? null;
-        } catch {
-          serverErrors = null;
-        }
-      }
-
-      if (serverErrors) {
-        Object.entries(serverErrors).forEach(([field, messages]) => {
-          setError(field, {
-            type: "server",
-            message: Array.isArray(messages) ? messages[0] : messages,
-          });
+    // Handle field validation errors
+    if (result?.errors) {
+      Object.entries(result.errors).forEach(([field, messages]) => {
+        setError(field, {
+          type: "server",
+          message: Array.isArray(messages) ? messages[0] : messages,
         });
-        return;
-      }
-
-      toast.error(error?.message || "Signup failed");
+      });
+      return;
     }
+
+    // Handle general error
+    if (result?.error) {
+      toast.error(result.error);
+      return;
+    }
+
+    toast.success("Account created successfully");
+    router.push("/login");
   };
 
   return (

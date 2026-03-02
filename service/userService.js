@@ -71,7 +71,7 @@ export async function registerUser(data) {
     throw new Error(
       JSON.stringify({
         errors: response.errors,
-        detail: response?.detail,
+        error: response?.detail || response?.error,
       }),
     );
   }
@@ -132,8 +132,7 @@ export async function forgotPassword(email) {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    console.log(err);
-    throw new Error(err.detail || "Failed to request password reset");
+    throw new Error(err?.error || "Failed to request password reset");
   }
 
   const response = await res.json();
@@ -168,7 +167,7 @@ export async function resetPassword({ token, newPassword }) {
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to reset password");
+    throw new Error(err?.error || "Failed to reset password");
   }
 
   return res.json();

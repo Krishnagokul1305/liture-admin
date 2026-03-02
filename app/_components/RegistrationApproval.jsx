@@ -56,27 +56,25 @@ export default function RegistrationApproval({
 
   const handleApprove = () => {
     startTransition(async () => {
-      try {
-        await onApprove();
-        toast.success("Registration approved!");
-      } catch (error) {
-        toast.error("Failed to approve registration");
-        console.error(error);
+      const result = await onApprove();
+      if (result?.error) {
+        toast.error(result.error);
+        return;
       }
+      toast.success("Registration approved!");
     });
   };
 
   const handleReject = form.handleSubmit(({ reason }) => {
     startTransition(async () => {
-      try {
-        await onReject(reason);
-        toast.success("Registration rejected!");
-        setShowRejectForm(false);
-        form.reset();
-      } catch (error) {
-        toast.error("Failed to reject registration");
-        console.error(error);
+      const result = await onReject(reason);
+      if (result?.error) {
+        toast.error(result.error);
+        return;
       }
+      toast.success("Registration rejected!");
+      setShowRejectForm(false);
+      form.reset();
     });
   });
 

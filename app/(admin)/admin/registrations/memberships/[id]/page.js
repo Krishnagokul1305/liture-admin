@@ -16,12 +16,12 @@ export default async function Page({ params }) {
 
   const handleApprove = async () => {
     "use server";
-    await changeMembershipRegistrationStatus(id, "accepted");
+    return await changeMembershipRegistrationStatus(id, "accepted");
   };
 
   const handleReject = async (reason) => {
     "use server";
-    await changeMembershipRegistrationStatus(id, "rejected", reason);
+    return await changeMembershipRegistrationStatus(id, "rejected", reason);
   };
   return (
     <div className="space-y-5 max-w-7xl mx-auto">

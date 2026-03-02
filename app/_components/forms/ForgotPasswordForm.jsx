@@ -23,17 +23,15 @@ export function ForgotPasswordForm({ className, ...props }) {
   });
 
   const onSubmit = async (data) => {
-    toast.promise(
-      (async () => {
-        await forgotPasswordAction(data.email);
-        return true;
-      })(),
-      {
-        loading: "Sending reset link...",
-        success: "Reset link sent to your email",
-        error: "Error sending the link",
-      },
-    );
+    const loadingToast = toast.loading("Sending reset link...");
+    const result = await forgotPasswordAction(data.email);
+    toast.dismiss(loadingToast);
+
+    if (result?.error) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success("Reset link sent to your email");
   };
 
   return (

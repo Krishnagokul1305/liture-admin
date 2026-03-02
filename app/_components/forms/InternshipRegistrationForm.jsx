@@ -42,25 +42,25 @@ export default function InternshipRegistrationForm({ internshipId, close }) {
 
   const onSubmit = (values) => {
     startTransition(async () => {
-      try {
-        const formData = new FormData();
-        formData.append("internship_id", values.internship_id);
-        formData.append("reason", values.reason);
-        if (values.resume?.[0]) {
-          formData.append("resume", values.resume[0]);
-        }
-
-        await internshipregistrationaction(formData);
-        toast.success("Internship registration successful");
-        close?.();
-        form.reset({
-          reason: "",
-          internship_id: internshipId,
-          resume: undefined,
-        });
-      } catch (err) {
-        toast.error(err?.message || "Registration failed");
+      const formData = new FormData();
+      formData.append("internship_id", values.internship_id);
+      formData.append("reason", values.reason);
+      if (values.resume?.[0]) {
+        formData.append("resume", values.resume[0]);
       }
+
+      const result = await internshipregistrationaction(formData);
+      if (result?.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success("Internship registration successful");
+      close?.();
+      form.reset({
+        reason: "",
+        internship_id: internshipId,
+        resume: undefined,
+      });
     });
   };
 

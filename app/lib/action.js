@@ -46,8 +46,33 @@ export async function registerUserAction(data) {
 }
 
 export async function signupUserAction(data) {
-  const user = await registerUser(data);
-  return user;
+  try {
+    const user = await registerUser(data);
+    return { success: true, data: user };
+  } catch (error) {
+    // Check if error contains validation errors array or error message
+    let serverErrors = null;
+    let errorMessage = null;
+    try {
+      const maybeString =
+        typeof error === "string"
+          ? error
+          : typeof error?.message === "string"
+            ? error.message
+            : "";
+      const parsed = JSON.parse(maybeString);
+      serverErrors = parsed?.errors ?? null;
+      errorMessage = parsed?.error ?? null;
+    } catch {
+      if (error && typeof error === "object" && "errors" in error) {
+        serverErrors = error.errors;
+      }
+    }
+    if (serverErrors) {
+      return { errors: serverErrors };
+    }
+    return { error: errorMessage || error?.message || "Signup failed" };
+  }
 }
 
 export async function updateUserAction(id, data) {
@@ -62,11 +87,21 @@ export async function deleteUserAction(id) {
 }
 
 export async function forgotPasswordAction(email) {
-  return await forgotPassword(email);
+  try {
+    const response = await forgotPassword(email);
+    return { success: true, data: response };
+  } catch (error) {
+    return { error: error?.message || "Failed to send reset link" };
+  }
 }
 
 export async function resetPasswordAction(data) {
-  await resetPassword(data);
+  try {
+    await resetPassword(data);
+    return { success: true };
+  } catch (error) {
+    return { error: error?.message || "Failed to reset password" };
+  }
 }
 
 export async function contactAction(data) {
@@ -135,18 +170,30 @@ export async function deleteWebinarRegistrationAction(id) {
 }
 
 export async function webinarregistrationaction(data) {
-  const response = await registerWebinar(data);
-  return response;
+  try {
+    const response = await registerWebinar(data);
+    return { success: true, data: response };
+  } catch (error) {
+    return { error: error?.message || "Registration failed" };
+  }
 }
 
 export async function internshipregistrationaction(formData) {
-  const response = await applyInternship(formData);
-  return response;
+  try {
+    const response = await applyInternship(formData);
+    return { success: true, data: response };
+  } catch (error) {
+    return { error: error?.message || "Registration failed" };
+  }
 }
 
 export async function membershipregistrationaction(data) {
-  const response = await registerMembership(data);
-  return response;
+  try {
+    const response = await registerMembership(data);
+    return { success: true, data: response };
+  } catch (error) {
+    return { error: error?.message || "Registration failed" };
+  }
 }
 
 export async function changeWebinarRegistrationStatus(
@@ -154,12 +201,22 @@ export async function changeWebinarRegistrationStatus(
   status,
   rejectionReason = null,
 ) {
-  const { changeWebinarRegistrationStatus: changeStatus } =
-    await import("@/service/webinarService");
-  const response = await changeStatus(registrationId, status, rejectionReason);
-  revalidatePath("/registrations/webinars");
-  revalidatePath(`/registrations/webinars/${registrationId}`);
-  return response;
+  try {
+    const { changeWebinarRegistrationStatus: changeStatus } =
+      await import("@/service/webinarService");
+    const response = await changeStatus(
+      registrationId,
+      status,
+      rejectionReason,
+    );
+    revalidatePath("/registrations/webinars");
+    revalidatePath(`/registrations/webinars/${registrationId}`);
+    return { success: true, data: response };
+  } catch (error) {
+    return {
+      error: error?.error || error?.message || "Failed to change status",
+    };
+  }
 }
 
 export async function changeInternshipRegistrationStatus(
@@ -167,12 +224,22 @@ export async function changeInternshipRegistrationStatus(
   status,
   rejectionReason = null,
 ) {
-  const { changeInternshipRegistrationStatus: changeStatus } =
-    await import("@/service/internshipService");
-  const response = await changeStatus(registrationId, status, rejectionReason);
-  revalidatePath("/registrations/internships");
-  revalidatePath(`/registrations/internships/${registrationId}`);
-  return response;
+  try {
+    const { changeInternshipRegistrationStatus: changeStatus } =
+      await import("@/service/internshipService");
+    const response = await changeStatus(
+      registrationId,
+      status,
+      rejectionReason,
+    );
+    revalidatePath("/registrations/internships");
+    revalidatePath(`/registrations/internships/${registrationId}`);
+    return { success: true, data: response };
+  } catch (error) {
+    return {
+      error: error?.error || error?.message || "Failed to change status",
+    };
+  }
 }
 
 export async function changeMembershipRegistrationStatus(
@@ -180,12 +247,22 @@ export async function changeMembershipRegistrationStatus(
   status,
   rejectionReason = null,
 ) {
-  const { changeMembershipRegistrationStatus: changeStatus } =
-    await import("@/service/membershipService");
-  const response = await changeStatus(registrationId, status, rejectionReason);
-  revalidatePath("/registrations/memberships");
-  revalidatePath(`/registrations/memberships/${registrationId}`);
-  return response;
+  try {
+    const { changeMembershipRegistrationStatus: changeStatus } =
+      await import("@/service/membershipService");
+    const response = await changeStatus(
+      registrationId,
+      status,
+      rejectionReason,
+    );
+    revalidatePath("/registrations/memberships");
+    revalidatePath(`/registrations/memberships/${registrationId}`);
+    return { success: true, data: response };
+  } catch (error) {
+    return {
+      error: error?.error || error?.message || "Failed to change status",
+    };
+  }
 }
 
 export async function verifyEmailAction(token) {

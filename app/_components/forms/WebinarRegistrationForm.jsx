@@ -35,14 +35,14 @@ export default function WebinarRegistrationForm({ webinarId, close }) {
 
   const onSubmit = (values) => {
     startTransition(async () => {
-      try {
-        await webinarregistrationaction(values);
-        toast.success("Webinar registration successful");
-        close?.();
-        form.reset({ reason: "", webinar_id: webinarId });
-      } catch (err) {
-        toast.error(err?.message || "Registration failed");
+      const result = await webinarregistrationaction(values);
+      if (result?.error) {
+        toast.error(result.error);
+        return;
       }
+      toast.success("Webinar registration successful");
+      close?.();
+      form.reset({ reason: "", webinar_id: webinarId });
     });
   };
 
