@@ -19,6 +19,7 @@ const Header = () => {
   const [isOpportunitiesOpen, setIsOpportunitiesOpen] = useState(false);
 
   const { data: session } = useSession();
+  console.log(session);
   const userName = session?.user?.name || "User";
   const isToken = Boolean(session?.user);
 

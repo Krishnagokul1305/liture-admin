@@ -3,9 +3,28 @@ import { sendContactFormEmail, sendResetPasswordEmail } from "@/app/lib/email";
 
 const API_BASE_URL = process.env.DJANGO_API_URL;
 
-export async function getAllUsers() {
+export async function getAllUsers(params = {}) {
   const session = await auth();
-  const res = await fetch(`${API_BASE_URL}/users/`, {
+  const queryParams = new URLSearchParams();
+  const search = params?.search;
+  const role = params?.role;
+
+  if (search) {
+    queryParams.set("user", search);
+  }
+
+  if (role === "SUPERADMIN") {
+    queryParams.set("issuperuser", "True");
+  } else if (role === "ADMIN") {
+    queryParams.set("issuperuser", "False");
+    queryParams.set("isstaff", "True");
+  } else if (role === "USER") {
+    queryParams.set("issuperuser", "False");
+    queryParams.set("isstaff", "False");
+  }
+
+  const query = queryParams.toString();
+  const res = await fetch(`${API_BASE_URL}/users/${query ? `?${query}` : ""}`, {
     headers: {
       Authorization: `Bearer ${session?.accessToken}`,
       "Content-Type": "application/json",
