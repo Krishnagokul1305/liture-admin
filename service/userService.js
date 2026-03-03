@@ -10,17 +10,17 @@ export async function getAllUsers(params = {}) {
   const role = params?.role;
 
   if (search) {
-    queryParams.set("user", search);
+    queryParams.set("name", search);
   }
 
   if (role === "SUPERADMIN") {
-    queryParams.set("issuperuser", "True");
+    queryParams.set("is_superuser", "True");
   } else if (role === "ADMIN") {
-    queryParams.set("issuperuser", "False");
-    queryParams.set("isstaff", "True");
+    queryParams.set("is_superuser", "False");
+    queryParams.set("is_staff", "True");
   } else if (role === "USER") {
-    queryParams.set("issuperuser", "False");
-    queryParams.set("isstaff", "False");
+    queryParams.set("is_superuser", "False");
+    queryParams.set("is_staff", "False");
   }
 
   const query = queryParams.toString();
