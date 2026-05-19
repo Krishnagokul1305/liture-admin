@@ -22,7 +22,7 @@ export default async function MembershipSection() {
           variants={fadeMove("up", 40, 0)}
           className="text-center mb-12"
         >
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl f                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ont-bold mb-4 text-balance">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 text-balance">
             Become a <span className="text-primary">Member</span>
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto text-pretty">
