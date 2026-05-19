@@ -20,7 +20,7 @@ async function page({ searchParams }) {
             Manage webinar sessions, schedules, and visibility on the platform.
           </p>
         </div>
-        <Button className={"mt-5 lg:mt-0"} href={"/webinars/create"}>
+        <Button className={"mt-5 lg:mt-0"} href={"/admin/webinars/create"}>
           <Plus /> Add
         </Button>
       </div>
