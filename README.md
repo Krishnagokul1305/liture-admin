@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Liture Admin
+
+Liture Admin is the Next.js application that powers the Liture EdTech public website and internal admin console. It combines the marketing site, user authentication, and admin workflows for managing webinars, internships, memberships, registrations, members, and dashboard analytics.
+
+## What It Does
+
+- Public landing experience with sections for the brand story, achievements, opportunities, memberships, members, and contact.
+- Public listings for webinars and internships.
+- Authentication flows for login, signup, email verification, password reset, and forgot-password.
+- Admin dashboard with analytics cards, charts, and recent registration tables.
+- Management screens for webinars, internships, memberships, users, and registrations.
+- Server-side auth and data fetching backed by a Django API.
+
+## Tech Stack
+
+- Next.js 16 with the App Router
+- React 19
+- Tailwind CSS 4
+- NextAuth for authentication
+- React Query and TanStack Table for data-heavy admin views
+- MongoDB-related dependencies for data access where needed
+- Nodemailer and Resend for email workflows
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ recommended
+- npm, pnpm, yarn, or bun
+- A running Django API for authentication and app data
+
+### Install
+
+```bash
+npm install
+```
+
+### Run locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Build for production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm run start
+```
 
-## Learn More
+## Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+The app expects these variables in the local environment or deployment platform:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `DJANGO_API_URL` - base URL for the backend API
+- `FRONTEND_URL` - public frontend URL used in email and redirect flows
+- `NEXTAUTH_SECRET` - secret for NextAuth
+- `EMAIL_HOST` - SMTP host, defaults to `smtp.gmail.com`
+- `EMAIL_PORT` - SMTP port, defaults to `465`
+- `EMAIL_HOST_USER` - SMTP username
+- `EMAIL_HOST_PASSWORD` - SMTP password
+- `EMAIL_FROM` - sender address for outgoing email
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If you use remote images or file uploads, make sure the deployment environment also allows the configured asset host.
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `app/(root)` - public site pages and sections
+- `app/(auth)` - authentication pages and flows
+- `app/(admin)` - protected admin pages and dashboard
+- `app/api` - route handlers that support auth and user endpoints
+- `app/_components` - shared UI for the app routes
+- `components` - reusable UI primitives and shared components
+- `service` - client helpers for API calls and business operations
+- `lib` - auth, email, action, and validation utilities
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Main Routes
+
+- `/` - public homepage
+- `/webinars` - webinar listings
+- `/internships` - internship listings
+- `/login` - sign in
+- `/signup` - sign up
+- `/forgot-password` - request password reset
+- `/reset-password` - complete password reset
+- `/verify-email` - confirm email address
+- `/admin` - admin dashboard
+- `/admin/webinars` - manage webinars
+- `/admin/internships` - manage internships
+- `/admin/memberships` - manage memberships
+- `/admin/users` - manage users
+- `/admin/registrations/*` - view registrations by type
+
+## Scripts
+
+- `npm run dev` - start the development server
+- `npm run build` - create a production build
+- `npm run start` - run the production server
+- `npm run lint` - run lint checks
+
+## Notes
+
+- The admin dashboard is protected and redirects unauthorised users to the login page.
+- Several views depend on the Django backend being available, so the app is best run with the API configured.
+- Remote assets are configured in `next.config.mjs` for the allowed image host.
