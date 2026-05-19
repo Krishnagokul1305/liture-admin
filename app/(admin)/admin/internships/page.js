@@ -20,7 +20,7 @@ async function page({ searchParams }) {
             Manage internship listings, schedules, and visibility for users.
           </p>
         </div>
-        <Button className={"mt-5 lg:mt-0"} href={"/internships/create"}>
+        <Button className={"mt-5 lg:mt-0"} href={"/admin/internships/create"}>
           <Plus /> Add
         </Button>
       </div>
