@@ -69,7 +69,6 @@ export async function getAllInternshipRegistrations({
   }
   params.append("page", page);
   params.append("limit", limit);
-
   const res = await fetch(
     `${API_BASE_URL}/internships/registrations/?${params.toString()}`,
     {

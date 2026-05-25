@@ -308,7 +308,7 @@ const Header = () => {
 
             {/* Mobile Auth */}
             <div className="pt-4 border-t">
-              {isToken ? (
+              {!isToken ? (
                 <div className="grid gap-3">
                   <button
                     onClick={() => {
