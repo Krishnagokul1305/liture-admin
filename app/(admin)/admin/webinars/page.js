@@ -8,7 +8,6 @@ import WebinarTable from "@/app/_components/tables/WebinarTable";
 import { getAllWebinars } from "@/service/webinarService";
 
 async function page({ searchParams }) {
-  const { isAdmin, isStaff } = await getCurrentUserStatus();
   const params = await searchParams;
   const data = await getAllWebinars(params);
   return (
