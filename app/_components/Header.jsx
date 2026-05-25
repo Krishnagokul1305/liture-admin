@@ -194,6 +194,13 @@ const Header = () => {
 
                   <div className="absolute top-full right-0 mt-2 w-48 rounded-lg overflow-hidden bg-white border shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <button
+                      onClick={() => router.push("/registrations")}
+                      className="w-full text-left px-4 py-3 text-sm cursor-pointer font-medium text-gray-700 hover:bg-red-50/50 flex items-center gap-2"
+                    >
+                      Your Registrations
+                    </button>
+
+                    <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50/50 flex items-center gap-2 border-t"
                     >
@@ -335,6 +342,17 @@ const Header = () => {
                       </p>
                     </div>
                   </div>
+
+                  <button
+                    onClick={() => {
+                      router.push("/registrations");
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-3 text-base font-semibold border border-gray-200 rounded-xl hover:bg-gray-50 transition-all text-gray-700"
+                  >
+                    Your Registrations
+                  </button>
+
                   <Button
                     onClick={async () => {
                       await handleLogout();

@@ -8,7 +8,6 @@ import { getAllInternships } from "@/service/internshipService";
 import InternshipTable from "@/app/_components/tables/InternshipTable";
 
 async function page({ searchParams }) {
-  const { isAdmin, isStaff } = await getCurrentUserStatus();
   const params = await searchParams;
   const data = await getAllInternships(params);
   return (

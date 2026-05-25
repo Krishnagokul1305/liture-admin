@@ -7,7 +7,6 @@ import StatusFilter from "@/app/_components/StatusFilter";
 import TableFilter from "@/components/table/TableFilter";
 
 async function page({ searchParams }) {
-  const { isAdmin, isStaff } = await getCurrentUserStatus();
   const searchs = await searchParams;
   const data = await getAllInternshipRegistrations(searchs);
   return (

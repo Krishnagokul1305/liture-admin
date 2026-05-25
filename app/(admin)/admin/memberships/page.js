@@ -8,7 +8,6 @@ import MembershipForm from "@/app/_components/forms/MemberShipForm";
 import { getAllMemberships } from "@/service/membershipService";
 
 async function page({ searchParams }) {
-  const { isAdmin, isStaff } = await getCurrentUserStatus();
   const param = await searchParams;
   const data = await getAllMemberships(param);
 

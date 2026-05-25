@@ -6,7 +6,6 @@ import RegistrationTable from "@/app/_components/tables/RegistrationTable";
 import StatusFilter from "@/app/_components/StatusFilter";
 
 async function page({ searchParams }) {
-  const { isAdmin, isStaff } = await getCurrentUserStatus();
   const searchs = await searchParams;
   const data = await getAllMembershipRegistrations(searchs);
   return (
